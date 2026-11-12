@@ -11,7 +11,8 @@ const PANEL = {
   dashboard: { file: "Dashboard.html", label: "Resumen", icon: "bi bi-grid-1x2" },
   fiados: { file: "Fiados.html", label: "Fiados", icon: "bi bi-journal-text" },
   clientes: { file: "Clientes.html", label: "Clientes", icon: "bi bi-people" },
-  productos: { file: "Productos.html", label: "Productos", icon: "bi bi-basket2" },
+  productos: { file: "Productos.html", label: "Inventario", icon: "bi bi-basket2" },
+  ventas: { file: "Ventas.html", label: "Ventas", icon: "bi bi-cart-check" },
   reportes: { file: "Reportes.html", label: "Reportes", icon: "bi bi-bar-chart" },
   config: { file: "Config.html", label: "Configuración", icon: "bi bi-gear" }
 };
@@ -99,7 +100,10 @@ function loadData() {
   d.clients = Array.isArray(d.clients) ? d.clients : [];
   d.products = Array.isArray(d.products) ? d.products : [];
   d.movements = Array.isArray(d.movements) ? d.movements : [];
-  d.products.forEach((p, i) => { if (!p.id) p.id = "p" + i + "-" + Date.now(); });
+  d.products.forEach((p, i) => {
+    if (!p.id) p.id = "p" + i + "-" + Date.now();
+    if (!Number.isInteger(p.stock) || p.stock < 0) p.stock = 0;
+  });
   return d;
 }
 let data = loadData();
@@ -136,7 +140,11 @@ function toast(msg) {
 function movRow(m) {
   const li = h("li", "row");
   const left = h("div");
-  left.append(h("strong", "", m.client), h("small", "", `${tr(m.text)} · ${m.ts ? fmtDate(m.ts) : m.date}`));
+  const items = Array.isArray(m.items) && m.items.length
+    ? m.items.map(item => `${item.quantity} × ${tr(item.name)}`).join(", ")
+    : tr(m.text);
+  const date = m.ts ? fmtDate(m.ts) : m.date;
+  left.append(h("strong", "", m.client), h("small", "", `${date} · ${items}`));
   const pago = m.type === "pago";
   li.append(left, h("strong", pago ? "pos" : "neg", `${pago ? "−" : "+"} ${money(m.amount)}`));
   return li;
@@ -173,7 +181,11 @@ const rules = {
   phone: v => v.trim() === "" || /^[\d\s+-]{7,}$/.test(v) || tr("Escribe un teléfono válido."),
   amount: v => Number(v) > 0 || tr("Escribe un monto mayor a 0."),
   price: v => Number(v) > 0 || tr("Escribe un precio mayor a 0."),
-  client: v => v !== "" || tr("Elige un cliente.")
+  client: v => v !== "" || tr("Elige un cliente."),
+  product: v => v !== "" || tr("Elige un producto."),
+  quantity: v => v.trim() !== "" && Number.isInteger(Number(v)) && Number(v) > 0 || tr("Escribe una cantidad entera mayor a 0."),
+  stock: v => v.trim() !== "" && Number.isInteger(Number(v)) && Number(v) >= 0 || tr("Escribe una cantidad entera de 0 o más."),
+  date: v => v !== "" && Number.isFinite(new Date(`${v}T00:00:00`).getTime()) || tr("Elige una fecha válida.")
 };
 function validate(field) {
   const rule = rules[field.name];
@@ -194,50 +206,60 @@ function handleForm(form, onValid) {
 
 /* ---------- Ventana: nuevo movimiento ---------- */
 function movementDialog() {
-  makeDialog("movDialog", "Nuevo movimiento", `
+  makeDialog("movDialog", "Registrar pago", `
     <form class="form form--light" id="movForm" novalidate>
       <label for="mv-client">Cliente</label>
       <select id="mv-client" name="client"></select><small class="error" data-for="client"></small>
-      <label for="mv-type">Tipo</label>
-      <select id="mv-type" name="type"><option value="fiado">Fiado (se lleva algo)</option><option value="pago">Pago (abona)</option></select>
       <label for="mv-amount">Monto (B/.)</label>
       <input id="mv-amount" name="amount" type="number" step="0.01" min="0" inputmode="decimal"><small class="error" data-for="amount"></small>
       <label for="mv-note">Nota (opcional)</label>
       <input id="mv-note" name="note" type="text" maxlength="60">
-      <div class="app-dialog__actions"><button type="button" class="btn btn--ghost" data-close>Cancelar</button><button class="btn btn--primary" type="submit">Guardar</button></div>
+      <p class="form__error" id="movFormError" role="alert" hidden></p>
+      <div class="app-dialog__actions"><button type="button" class="btn btn--ghost" data-close>Cancelar</button><button class="btn btn--primary" type="submit">Guardar pago</button></div>
     </form>`);
 
   handleForm($("#movForm"), v => {
     const c = data.clients.find(x => x.id === v.client);
     let amount = round2(Number(v.amount));
-    if (v.type === "pago") {
-      if (c.debt <= 0) { $('#movForm .error[data-for="amount"]').textContent = tr("Este cliente no tiene saldo pendiente."); return; }
-      amount = Math.min(amount, c.debt);
-      c.debt = round2(c.debt - amount);
-    } else {
-      c.debt = round2(c.debt + amount);
+    if (!c) {
+      $('#movForm .error[data-for="client"]').textContent = tr("Elige un cliente.");
+      return;
     }
+    if (c.debt <= 0) {
+      $('#movForm .error[data-for="amount"]').textContent = tr("Este cliente no tiene saldo pendiente.");
+      return;
+    }
+    amount = Math.min(amount, c.debt);
+    const previousDebt = c.debt;
+    c.debt = round2(c.debt - amount);
     const now = Date.now();
-    data.movements.unshift({
-      client: c.name, type: v.type, amount, ts: now,
-      text: v.note.trim() || (v.type === "pago" ? "Pago" : "Fiado"),
+    const movement = {
+      client: c.name, type: "pago", amount, ts: now,
+      text: v.note.trim() || "Pago",
       date: new Date(now).toLocaleDateString(LOCALE)
-    });
-    saveData();
+    };
+    data.movements.unshift(movement);
+    if (!saveData()) {
+      c.debt = previousDebt;
+      data.movements.shift();
+      $("#movFormError").textContent = tr("No se pudo guardar. Libera espacio en el navegador e inténtalo otra vez.");
+      $("#movFormError").hidden = false;
+      return;
+    }
     $("#movDialog").close();
-    toast(v.type === "pago" ? tr("Pago de {amount} registrado", { amount: money(amount) }) : tr("Fiado de {amount} registrado", { amount: money(amount) }));
+    toast(tr("Pago de {amount} registrado", { amount: money(amount) }));
     refresh();
   });
 }
 
-function openMovement(clientId = "", type = "fiado") {
+function openMovement(clientId = "") {
   const sel = $("#mv-client");
   sel.replaceChildren(new Option(tr("Elige un cliente"), ""));
   data.clients.forEach(c => sel.add(new Option(c.name, c.id)));
   $("#movForm").reset();
+  $("#movFormError").hidden = true;
   $$("#movForm .error").forEach(e => (e.textContent = ""));
   sel.value = clientId;
-  $("#mv-type").value = type;
   $("#movDialog").showModal();
 }
 
@@ -290,14 +312,20 @@ function shell() {
   });
 
   movementDialog();
-  $("#newMov").addEventListener("click", () => openMovement());
+  const newMovementButton = $("#newMov");
+  if (newMovementButton) {
+    newMovementButton.addEventListener("click", () => {
+      if (document.body.dataset.page === "dashboard") location.href = PANEL.ventas.file;
+      else openMovement();
+    });
+  }
 }
 
 /* ========== RESUMEN ========== */
 function pageDashboard() {
   $("#greet").textContent = tr("Hola, {name}", { name: session.name });
-  $("#quickFiar").addEventListener("click", () => openMovement("", "fiado"));
-  $("#quickPago").addEventListener("click", () => openMovement("", "pago"));
+  $("#quickFiar").addEventListener("click", () => { location.href = PANEL.ventas.file; });
+  $("#quickPago").addEventListener("click", () => openMovement());
 
   refresh = () => {
     const set = (id, val) => animateNumber($(id), parseFloat($(id).textContent) || 0, val);
@@ -309,7 +337,7 @@ function pageDashboard() {
     const recent = $("#recent");
     recent.replaceChildren();
     if (!data.movements.length) recent.append(h("li", "empty", tr("Aún no hay movimientos. Registra el primero.")));
-    data.movements.slice(0, 5).forEach(m => recent.append(movRow(m)));
+    data.movements.slice().sort((a, b) => (b.ts || 0) - (a.ts || 0)).slice(0, 5).forEach(m => recent.append(movRow(m)));
 
     bars($("#top"), data.clients.filter(c => c.debt > 0).sort((a, b) => b.debt - a.debt).slice(0, 4).map(c => ({ label: c.name, value: c.debt })));
   };
@@ -322,7 +350,8 @@ function pageFiados() {
   refresh = () => {
     const list = $("#movList");
     const items = data.movements.filter(m =>
-      (filter === "todos" || m.type === filter) && m.client.toLowerCase().includes(q));
+      (filter === "todos" || m.type === filter) && m.client.toLowerCase().includes(q))
+      .sort((a, b) => (b.ts || 0) - (a.ts || 0));
     list.replaceChildren();
     if (!items.length) list.append(h("li", "empty", tr("No hay movimientos con ese filtro.")));
     items.forEach(m => list.append(movRow(m)));
@@ -420,8 +449,52 @@ function pageClientes() {
   const search = $("#clientSearch");
   const carousel = $("#clientList");
   const indicators = $("#clientIndicators");
-  let carouselInstance = null;
+  const carouselElement = $("#clientsCarousel");
+  let currentIndex = 0;
+  let swipeStartX = null;
   let filter = "todos";
+  const updateCarousel = nextIndex => {
+    const cards = $$(".client-card", carousel);
+    if (!cards.length) return;
+    currentIndex = (nextIndex + cards.length) % cards.length;
+    const cardWidth = cards[0].offsetWidth;
+    const step = cardWidth * .72;
+    cards.forEach((card, index) => {
+      let offset = (index - currentIndex + cards.length) % cards.length;
+      if (offset > cards.length / 2) offset -= cards.length;
+      const distance = Math.abs(offset);
+      card.style.setProperty("--client-offset", `${offset * step}px`);
+      card.style.setProperty("--client-scale", distance === 0 ? "1" : distance === 1 ? ".84" : ".68");
+      card.style.zIndex = String(20 - distance);
+      card.style.opacity = distance <= 1 ? (distance === 0 ? "1" : ".9") : "0";
+      card.classList.toggle("is-active", distance === 0);
+      card.setAttribute("aria-hidden", String(distance !== 0));
+      card.inert = distance !== 0;
+    });
+    $$(".client-carousel__indicator", indicators).forEach((button, index) => {
+      button.setAttribute("aria-current", String(index === currentIndex));
+    });
+  };
+  carouselElement.querySelector(".client-carousel__control--prev").addEventListener("click", () => updateCarousel(currentIndex - 1));
+  carouselElement.querySelector(".client-carousel__control--next").addEventListener("click", () => updateCarousel(currentIndex + 1));
+  carouselElement.addEventListener("keydown", event => {
+    if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+    if (event.target.matches("input, textarea, select")) return;
+    event.preventDefault();
+    updateCarousel(currentIndex + (event.key === "ArrowRight" ? 1 : -1));
+  });
+  carouselElement.addEventListener("pointerdown", event => {
+    if (event.target.closest("button, input, label")) return;
+    swipeStartX = event.clientX;
+  });
+  carouselElement.addEventListener("pointerup", event => {
+    if (swipeStartX === null) return;
+    const distance = event.clientX - swipeStartX;
+    swipeStartX = null;
+    if (Math.abs(distance) > 45) updateCarousel(currentIndex + (distance < 0 ? 1 : -1));
+  });
+  carouselElement.addEventListener("pointercancel", () => { swipeStartX = null; });
+  window.addEventListener("resize", () => updateCarousel(currentIndex), { passive: true });
   $$("[data-client-filter]").forEach(button => button.addEventListener("click", () => {
     filter = button.dataset.clientFilter;
     $$("[data-client-filter]").forEach(item => {
@@ -434,13 +507,9 @@ function pageClientes() {
 
   refresh = () => {
     const q = search.value.trim().toLowerCase();
-    const list = $("#clientList");
-    if (carouselInstance) {
-      carouselInstance.dispose();
-      carouselInstance = null;
-    }
-    list.replaceChildren();
+    carousel.replaceChildren();
     indicators.replaceChildren();
+    currentIndex = 0;
     const items = data.clients.filter(c => {
       const matchesSearch = c.name.toLowerCase().includes(q) || (c.phone || "").toLowerCase().includes(q);
       const matchesFilter = filter === "todos" || (filter === "pendientes" ? c.debt > 0 : c.debt <= 0);
@@ -448,7 +517,6 @@ function pageClientes() {
     });
     $("#clientCount").textContent = tr(items.length === 1 ? "{n} cliente" : "{n} clientes", { n: items.length });
     if (!items.length) {
-      const emptySlide = h("div", "carousel-item active");
       const empty = h("div", "client-empty");
       const message = q
         ? tr("No encontramos clientes con esa búsqueda.")
@@ -462,59 +530,21 @@ function pageClientes() {
           ? tr("Prueba cambiando el filtro.")
           : tr("Agrega a tu primer cliente para empezar a registrar sus fiados.");
       empty.append(h("p", "", hint));
-      emptySlide.append(empty);
-      list.append(emptySlide);
+      carousel.append(empty);
     }
-    const cardsPerSlide = 1;
-    const slides = [];
-    for (let index = 0; index < items.length; index += cardsPerSlide) {
-      const slide = h("div", `carousel-item${index === 0 ? " active" : ""}`);
-      const group = h("div", "client-slide");
-      slide.append(group);
-      list.append(slide);
-      slides.push(slide);
+    items.forEach((client, index) => {
       const indicator = h("button");
+      indicator.className = "client-carousel__indicator";
       indicator.type = "button";
-      indicator.setAttribute("data-bs-target", "#clientsCarousel");
-      indicator.setAttribute("data-bs-slide-to", String(slides.length - 1));
-      indicator.setAttribute("aria-label", tr("Ir al grupo {n}", { n: slides.length }));
+      indicator.setAttribute("aria-label", tr("Ir al grupo {n}", { n: index + 1 }));
       if (index === 0) {
-        indicator.classList.add("active");
         indicator.setAttribute("aria-current", "true");
-      }
-      indicators.append(indicator);
-    }
-    const makeClientPreview = (client, position) => {
-      const card = h("div", `client-card client-card--peek client-card--peek-${position}`);
-      card.setAttribute("aria-hidden", "true");
-      const visual = h("div", "client-card__visual");
-      const avatar = h("div", "client-avatar");
-      if (client.photo) {
-        const image = new Image();
-        image.src = client.photo;
-        image.alt = "";
-        avatar.append(image);
       } else {
-        avatar.textContent = client.name.split(/\s+/).slice(0, 2).map(part => part.charAt(0)).join("").toUpperCase();
+        indicator.setAttribute("aria-current", "false");
       }
-      visual.append(avatar);
-      const details = h("div", "client-card__details");
-      details.append(h("h3", "", client.name));
-      const balance = h("div", client.debt > 0 ? "client-balance is-pending" : "client-balance is-clear");
-      balance.append(h("small", "", client.debt > 0 ? tr("Saldo pendiente") : tr("Cuenta al día")));
-      balance.append(h("strong", "", money(client.debt)));
-      card.append(visual, details, balance);
-      return card;
-    };
-    if (items.length > 1) {
-      slides.forEach((slide, index) => {
-        const group = $(".client-slide", slide);
-        group.append(
-          makeClientPreview(items[(index + items.length - 1) % items.length], "prev"),
-          makeClientPreview(items[(index + 1) % items.length], "next")
-        );
-      });
-    }
+      indicator.addEventListener("click", () => updateCarousel(index));
+      indicators.append(indicator);
+    });
     items.forEach(c => {
       const card = h("article", "client-card");
       card.setAttribute("aria-label", tr("Ficha de {name}", { name: c.name }));
@@ -530,77 +560,45 @@ function pageClientes() {
         avatar.textContent = c.name.split(/\s+/).slice(0, 2).map(part => part.charAt(0)).join("").toUpperCase();
       }
       visual.append(avatar);
-      const statusBadge = h("span", c.debt > 0 ? "client-card__status is-pending" : "client-card__status is-clear", c.debt > 0 ? tr("Pendiente") : tr("Al día"));
-      visual.append(statusBadge);
 
       const details = h("div", "client-card__details");
-      details.append(h("h3", "", c.name), h("p", "client-card__phone", c.phone || tr("Sin teléfono")));
+      details.append(h("h3", "client-card__name", c.name));
+      const meta = h("div", "client-card__meta");
+      const phone = h("span", "client-card__tag");
+      phone.append(h("i", "bi bi-telephone", ""), document.createTextNode(` ${c.phone || tr("Sin teléfono")}`));
+      const status = h("span", c.debt > 0 ? "client-card__tag is-pending" : "client-card__tag is-clear", c.debt > 0 ? tr("Pendiente") : tr("Al día"));
+      meta.append(phone, status);
+      details.append(meta);
       const balance = h("div", c.debt > 0 ? "client-balance is-pending" : "client-balance is-clear");
       balance.append(h("small", "", c.debt > 0 ? tr("Saldo pendiente") : tr("Cuenta al día")));
       balance.append(h("strong", "", money(c.debt)));
+      const footer = h("div", "client-card__footer");
+      footer.append(balance);
       const actions = h("div", "client-card__actions");
-      const photoPicker = h("input", "visually-hidden");
-      photoPicker.id = `client-photo-${c.id}`;
-      photoPicker.type = "file";
-      photoPicker.accept = "image/jpeg,image/png,image/webp,image/gif";
-      photoPicker.addEventListener("change", async () => {
-        const file = photoPicker.files[0];
-        if (!file) return;
-        try {
-          const previousPhoto = c.photo;
-          c.photo = await clientPhotoFromFile(file);
-          if (!saveData()) {
-            c.photo = previousPhoto;
-            toast(tr("No se pudo guardar. Libera espacio en el navegador e inténtalo otra vez."));
-            return;
-          }
-          toast(tr("Foto del cliente actualizada"));
-          refresh();
-        } catch (photoError) {
-          toast(photoError.message);
-        } finally {
-          photoPicker.value = "";
-        }
-      });
-      const photoLabel = h("label", "btn btn--ghost btn--sm");
-      photoLabel.htmlFor = photoPicker.id;
-      photoLabel.append(h("i", "bi bi-camera", ""), document.createTextNode(` ${tr("Cambiar foto")}`));
-      actions.append(photoPicker, photoLabel);
-      const fiar = h("button", "btn btn--ghost btn--sm");
-      fiar.type = "button";
-      fiar.append(h("i", "bi bi-bag-plus", ""), document.createTextNode(` ${tr("Fiar")}`));
-      fiar.addEventListener("click", () => openMovement(c.id, "fiado"));
-      actions.append(fiar);
-      if (c.debt > 0) {
-        const pay = h("button", "btn btn--pay btn--sm");
-        pay.type = "button";
-        pay.append(h("i", "bi bi-cash-coin", ""), document.createTextNode(` ${tr("Cobrar")}`));
-        pay.addEventListener("click", () => openMovement(c.id, "pago"));
-        actions.append(pay);
-      }
       const del = h("button", "btn btn--danger btn--sm");
       del.type = "button";
       del.setAttribute("aria-label", tr("Eliminar a {name}", { name: c.name }));
       del.append(h("i", "bi bi-trash3", ""), document.createTextNode(` ${tr("Eliminar")}`));
       del.addEventListener("click", () => {
         if (!confirm(tr("¿Eliminar a {name}? Su historial de movimientos se conserva.", { name: c.name }))) return;
+        const previousClients = data.clients;
         data.clients = data.clients.filter(x => x.id !== c.id);
-        saveData();
+        if (!saveData()) {
+          data.clients = previousClients;
+          toast(tr("No se pudo guardar. Libera espacio en el navegador e inténtalo otra vez."));
+          return;
+        }
         toast(tr("Cliente eliminado"));
         refresh();
       });
       actions.append(del);
-      card.append(visual, details, balance, actions);
-      const slideIndex = Math.floor(items.indexOf(c) / cardsPerSlide);
-      $(".client-slide", slides[slideIndex]).append(card);
+      card.append(visual, details, footer, actions);
+      carousel.append(card);
     });
-    if (slides.length > 1) {
-      carouselInstance = window.bootstrap?.Carousel.getOrCreateInstance($("#clientsCarousel"), { interval: false, touch: true, wrap: true });
-    }
-    $("#clientsCarousel").classList.toggle("client-carousel--single", slides.length <= 1);
+    carouselElement.classList.toggle("client-carousel--single", items.length <= 1);
+    updateCarousel(0);
   };
   search.addEventListener("input", () => {
-    $("#clientList").scrollLeft = 0;
     refresh();
   });
   refresh();
@@ -620,8 +618,18 @@ function pageProductos() {
       <input id="pr-name" name="name" type="text" autocomplete="off"><small class="error" data-for="name"></small>
       <label for="pr-price">Precio (B/.)</label>
       <input id="pr-price" name="price" type="number" step="0.01" min="0" inputmode="decimal"><small class="error" data-for="price"></small>
+      <label for="pr-stock">Existencias iniciales</label>
+      <input id="pr-stock" name="stock" type="number" step="1" min="0" value="0" inputmode="numeric"><small class="error" data-for="stock"></small>
       <p class="form__error" id="productFormError" role="alert" hidden></p>
       <div class="app-dialog__actions"><button type="button" class="btn btn--ghost" data-close>Cancelar</button><button class="btn btn--primary" type="submit">Agregar</button></div>
+    </form>`);
+  const stockDialog = makeDialog("stockDialog", "Actualizar existencias", `
+    <form class="form form--light" id="stockForm" novalidate>
+      <p class="muted" id="stockProductName"></p>
+      <label for="stock-value">Unidades disponibles</label>
+      <input id="stock-value" name="stock" type="number" step="1" min="0" inputmode="numeric"><small class="error" data-for="stock"></small>
+      <p class="form__error" id="stockFormError" role="alert" hidden></p>
+      <div class="app-dialog__actions"><button type="button" class="btn btn--ghost" data-close>Cancelar</button><button class="btn btn--primary" type="submit">Guardar existencias</button></div>
     </form>`);
   const form = $("#productForm");
   const photoInput = $("#pr-photo", form);
@@ -650,7 +658,14 @@ function pageProductos() {
   });
   handleForm($("#productForm"), v => {
     if ($('button[type="submit"]', form).disabled) return;
-    data.products.push({ id: "p" + Date.now(), name: v.name.trim(), price: round2(Number(v.price)), photo: photoData });
+    const product = {
+      id: "p" + Date.now(),
+      name: v.name.trim(),
+      price: round2(Number(v.price)),
+      stock: Number(v.stock),
+      photo: photoData
+    };
+    data.products.push(product);
     if (!saveData()) {
       data.products.pop();
       $("#productFormError").textContent = tr("No se pudo guardar. Libera espacio en el navegador e inténtalo otra vez.");
@@ -665,6 +680,36 @@ function pageProductos() {
     toast(tr("Producto agregado"));
     refresh();
   });
+  const stockForm = $("#stockForm");
+  let stockProductId = "";
+  handleForm(stockForm, v => {
+    const product = data.products.find(item => item.id === stockProductId);
+    if (!product) {
+      $("#stockFormError").textContent = tr("No se encontró el producto. Actualiza la página e inténtalo otra vez.");
+      $("#stockFormError").hidden = false;
+      return;
+    }
+    const previousStock = product.stock;
+    product.stock = Number(v.stock);
+    if (!saveData()) {
+      product.stock = previousStock;
+      $("#stockFormError").textContent = tr("No se pudo guardar. Libera espacio en el navegador e inténtalo otra vez.");
+      $("#stockFormError").hidden = false;
+      return;
+    }
+    stockDialog.close();
+    toast(tr("Existencias actualizadas"));
+    refresh();
+  });
+  const openStockDialog = product => {
+    stockProductId = product.id;
+    stockForm.reset();
+    $("#stock-value").value = String(product.stock);
+    $("#stockProductName").textContent = product.name;
+    $("#stockFormError").hidden = true;
+    $$(".error", stockForm).forEach(error => { error.textContent = ""; });
+    stockDialog.showModal();
+  };
   $("#addProduct").addEventListener("click", () => {
     form.reset();
     photoData = "";
@@ -729,19 +774,202 @@ function pageProductos() {
       photoButton.append(photoAction);
       const del = h("button", "btn btn--danger btn--sm", tr("Eliminar"));
       del.addEventListener("click", () => {
+        const previousProducts = data.products;
         data.products = data.products.filter(x => x.id !== p.id);
-        saveData();
+        if (!saveData()) {
+          data.products = previousProducts;
+          toast(tr("No se pudo guardar. Libera espacio en el navegador e inténtalo otra vez."));
+          return;
+        }
         toast(tr("Producto eliminado"));
         refresh();
       });
-      body.append(photoPicker, photoButton, h("h2", "product-card__name", tr(p.name)), h("p", "price product-card__price", money(p.price)), del);
+      const stockButton = h("button", "btn btn--ghost btn--sm", tr("Actualizar stock"));
+      stockButton.type = "button";
+      stockButton.addEventListener("click", () => openStockDialog(p));
+      const actions = h("div", "product-card__actions");
+      actions.append(stockButton, del);
+      body.append(
+        photoPicker,
+        photoButton,
+        h("h2", "product-card__name", tr(p.name)),
+        h("p", "price product-card__price", money(p.price)),
+        h("p", "product-card__stock", tr(p.stock === 1 ? "{n} unidad disponible" : "{n} unidades disponibles", { n: p.stock })),
+        actions
+      );
       card.append(body);
       grid.append(card);
     });
+    const totalStock = data.products.reduce((total, product) => total + product.stock, 0);
+    const productCount = data.products.length;
+    const productLabel = tr(productCount === 1 ? "{n} producto" : "{n} productos", { n: productCount });
+    const stockLabel = tr(totalStock === 1 ? "{n} unidad disponible" : "{n} unidades disponibles", { n: totalStock });
+    $("#inventorySummary").textContent = `${productLabel} · ${stockLabel}`;
     grid.classList.add("product-grid--enter");
   };
   search.addEventListener("input", refresh);
   refresh();
+}
+
+/* ========== VENTAS ========== */
+function pageVentas() {
+  const quickClientDialog = makeDialog("quickClientDialog", "Agregar cliente", `
+    <form class="form form--light" id="quickClientForm" novalidate>
+      <label for="quick-client-name">Nombre</label>
+      <input id="quick-client-name" name="name" type="text" autocomplete="off"><small class="error" data-for="name"></small>
+      <label for="quick-client-phone">Teléfono (opcional)</label>
+      <input id="quick-client-phone" name="phone" type="tel" placeholder="6000-0000"><small class="error" data-for="phone"></small>
+      <p class="form__error" id="quickClientFormError" role="alert" hidden></p>
+      <div class="app-dialog__actions"><button type="button" class="btn btn--ghost" data-close>Cancelar</button><button class="btn btn--primary" type="submit">Agregar cliente</button></div>
+    </form>`);
+  const form = $("#saleForm");
+  const clientSelect = $("#saleClient");
+  const productSelect = $("#saleProduct");
+  const quantityInput = $("#saleQuantity");
+  const dateInput = $("#saleDate");
+  const total = $("#saleTotal");
+  const stockNotice = $("#saleStockNotice");
+  const quickClientForm = $("#quickClientForm");
+
+  const localDate = date => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+  const selectedProduct = () => data.products.find(product => product.id === productSelect.value);
+  const updateTotal = () => {
+    const product = selectedProduct();
+    const quantity = Number(quantityInput.value);
+    total.textContent = product && Number.isFinite(quantity) && quantity > 0
+      ? money(round2(quantity * product.price))
+      : money(0);
+    quantityInput.max = product ? String(product.stock) : "";
+    if (product && Number.isInteger(quantity) && quantity > product.stock) {
+      $('.error[data-for="quantity"]', form).textContent = tr("Solo hay {n} unidades disponibles.", { n: product.stock });
+      quantityInput.setAttribute("aria-invalid", "true");
+    } else if (quantityInput.getAttribute("aria-invalid") === "true") validate(quantityInput);
+  };
+  const updateClientOptions = selectedId => {
+    clientSelect.replaceChildren(new Option(tr("Elige un cliente"), ""));
+    data.clients.forEach(client => clientSelect.add(new Option(client.name, client.id)));
+    if (selectedId) clientSelect.value = selectedId;
+  };
+  const updateProductOptions = selectedId => {
+    const available = data.products.filter(product => product.stock > 0);
+    productSelect.replaceChildren(new Option(
+      available.length ? tr("Elige un producto") : tr("No hay productos con existencias"),
+      ""
+    ));
+    available.forEach(product => {
+      productSelect.add(new Option(
+        `${tr(product.name)} · ${money(product.price)} · ${tr("{n} disponibles", { n: product.stock })}`,
+        product.id
+      ));
+    });
+    if (selectedId && available.some(product => product.id === selectedId)) productSelect.value = selectedId;
+    stockNotice.textContent = available.length
+      ? tr("Las existencias se descuentan al registrar el fiado.")
+      : tr("Agrega productos y unidades desde Inventario para empezar.");
+  };
+  const refresh = (selectedClientId = clientSelect.value, selectedProductId = productSelect.value) => {
+    updateClientOptions(selectedClientId);
+    updateProductOptions(selectedProductId);
+    updateTotal();
+  };
+
+  updateClientOptions();
+  updateProductOptions();
+  dateInput.value = localDate(new Date());
+  quantityInput.value = "1";
+  updateTotal();
+  clientSelect.addEventListener("change", () => validate(clientSelect));
+  productSelect.addEventListener("change", () => {
+    validate(productSelect);
+    updateTotal();
+  });
+  quantityInput.addEventListener("input", updateTotal);
+  quantityInput.addEventListener("blur", updateTotal);
+
+  $("#addSaleClient").addEventListener("click", () => {
+    quickClientForm.reset();
+    $("#quickClientFormError").hidden = true;
+    $$(".error", quickClientForm).forEach(error => { error.textContent = ""; });
+    quickClientDialog.showModal();
+  });
+  handleForm(quickClientForm, values => {
+    const client = {
+      id: "c" + Date.now(),
+      name: values.name.trim(),
+      phone: values.phone.trim(),
+      debt: 0,
+      photo: ""
+    };
+    data.clients.push(client);
+    if (!saveData()) {
+      data.clients.pop();
+      $("#quickClientFormError").textContent = tr("No se pudo guardar. Libera espacio en el navegador e inténtalo otra vez.");
+      $("#quickClientFormError").hidden = false;
+      return;
+    }
+    quickClientDialog.close();
+    refresh(client.id, productSelect.value);
+    validate(clientSelect);
+    toast(tr("Cliente agregado"));
+  });
+
+  handleForm(form, values => {
+    const client = data.clients.find(item => item.id === values.client);
+    const product = data.products.find(item => item.id === values.product);
+    const quantity = Number(values.quantity);
+    if (!client || !product) {
+      $("#saleFormError").textContent = tr("El cliente o el producto ya no está disponible. Actualiza la página e inténtalo otra vez.");
+      $("#saleFormError").hidden = false;
+      refresh();
+      return;
+    }
+    if (quantity > product.stock) {
+      $('.error[data-for="quantity"]', form).textContent = tr("Solo hay {n} unidades disponibles.", { n: product.stock });
+      quantityInput.setAttribute("aria-invalid", "true");
+      return;
+    }
+
+    const amount = round2(quantity * product.price);
+    const timestamp = new Date(`${values.date}T12:00:00`).getTime();
+    const previousDebt = client.debt;
+    const previousStock = product.stock;
+    const movement = {
+      client: client.name,
+      clientId: client.id,
+      type: "fiado",
+      amount,
+      ts: timestamp,
+      date: new Date(timestamp).toLocaleDateString(LOCALE),
+      text: "Fiado",
+      items: [{ productId: product.id, name: product.name, quantity, unitPrice: product.price }]
+    };
+    client.debt = round2(client.debt + amount);
+    product.stock -= quantity;
+    data.movements.unshift(movement);
+    if (!saveData()) {
+      client.debt = previousDebt;
+      product.stock = previousStock;
+      data.movements.shift();
+      $("#saleFormError").textContent = tr("No se pudo guardar. Libera espacio en el navegador e inténtalo otra vez.");
+      $("#saleFormError").hidden = false;
+      return;
+    }
+
+    form.reset();
+    dateInput.value = localDate(new Date());
+    quantityInput.value = "1";
+    $("#saleFormError").hidden = true;
+    $('.error[data-for="quantity"]', form).textContent = "";
+    quantityInput.removeAttribute("aria-invalid");
+    refresh("", "");
+    toast(tr("Fiado de {amount} registrado", { amount: money(amount) }));
+  });
+  $("#saleDate").addEventListener("change", () => validate(dateInput));
 }
 
 /* ========== REPORTES ========== */
@@ -791,7 +1019,7 @@ function pageConfig() {
 }
 
 /* ========== INICIO ========== */
-const pages = { dashboard: pageDashboard, fiados: pageFiados, clientes: pageClientes, productos: pageProductos, reportes: pageReportes, config: pageConfig };
+const pages = { dashboard: pageDashboard, fiados: pageFiados, clientes: pageClientes, productos: pageProductos, ventas: pageVentas, reportes: pageReportes, config: pageConfig };
 async function startPanel() {
   const page = PANEL[document.body.dataset.page];
   const next = page ? `?next=${encodeURIComponent(page.file)}` : "";

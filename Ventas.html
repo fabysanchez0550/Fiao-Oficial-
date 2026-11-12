@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Ventas | Panel FIA'O</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="Style/styles.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="Style/app.css">
+</head>
+<body class="app" data-page="ventas">
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <a href="index.html" class="logo">FIA'<span class="logo__o">O</span></a>
+      <nav class="side-nav" id="sideNav" aria-label="Panel"></nav>
+      <div class="side-foot">
+        <p id="userName"></p>
+        <button class="btn btn--ghost btn--sm" id="logout" type="button">Cerrar sesión</button>
+      </div>
+    </aside>
+    <div class="scrim" id="scrim"></div>
+
+    <div class="app-main">
+      <header class="topbar">
+        <button class="burger" id="menuBtn" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="sidebar"><span></span><span></span></button>
+        <h1>Ventas</h1>
+        <span class="topbar__biz" id="bizName"></span>
+      </header>
+
+      <main class="app-content">
+        <section class="panel-box sale-panel">
+          <div class="panel-head sale-panel__head">
+            <div>
+              <h2 class="h3">Registrar un fiado</h2>
+              <p class="muted">Elige un cliente y lo que se lleva. Su saldo y el inventario se actualizan al guardar.</p>
+            </div>
+          </div>
+
+          <form class="form form--light sale-form" id="saleForm" novalidate>
+            <div class="sale-form__grid">
+              <div class="sale-form__field">
+                <label for="saleClient">Cliente</label>
+                <div class="sale-form__client">
+                  <select id="saleClient" name="client"></select>
+                  <button class="btn btn--ghost btn--sm" id="addSaleClient" type="button"><i class="bi bi-person-plus" aria-hidden="true"></i> Nuevo cliente</button>
+                </div>
+                <small class="error" data-for="client"></small>
+              </div>
+
+              <div class="sale-form__field">
+                <label for="saleProduct">Producto</label>
+                <select id="saleProduct" name="product"></select>
+                <small class="error" data-for="product"></small>
+              </div>
+
+              <div class="sale-form__field">
+                <label for="saleQuantity">Cantidad</label>
+                <input id="saleQuantity" name="quantity" type="number" step="1" min="1" value="1" inputmode="numeric">
+                <small class="error" data-for="quantity"></small>
+              </div>
+
+              <div class="sale-form__field">
+                <label for="saleDate">Fecha</label>
+                <input id="saleDate" name="date" type="date">
+                <small class="error" data-for="date"></small>
+              </div>
+            </div>
+
+            <p class="muted sale-form__notice" id="saleStockNotice" aria-live="polite"></p>
+            <p class="form__error" id="saleFormError" role="alert" hidden></p>
+
+            <div class="sale-form__footer">
+              <div class="sale-total">
+                <span>Total del fiado</span>
+                <output id="saleTotal" aria-live="polite">B/. 0.00</output>
+              </div>
+              <button class="btn btn--primary" type="submit"><i class="bi bi-check2-circle" aria-hidden="true"></i> Registrar fiado</button>
+            </div>
+          </form>
+        </section>
+      </main>
+    </div>
+  </div>
+  <script src="Javas/i18n.js"></script>
+  <script src="Javas/firebase-config.js"></script>
+  <script src="Javas/firebase-loader.js"></script>
+  <script src="Javas/app.js"></script>
+</body>
+</html>

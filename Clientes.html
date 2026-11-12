@@ -8,7 +8,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="Style/styles.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <link rel="stylesheet" href="Style/app.css">
@@ -30,7 +29,6 @@
         <button class="burger" id="menuBtn" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="sidebar"><span></span><span></span></button>
         <h1>Clientes</h1>
         <span class="topbar__biz" id="bizName"></span>
-        <button class="btn btn--primary btn--sm" id="newMov" type="button"><i class="bi bi-plus-lg" aria-hidden="true"></i> Nuevo movimiento</button>
       </header>
 
       <main class="app-content">
@@ -51,13 +49,13 @@
               <button class="tab" type="button" data-client-filter="aldia" aria-pressed="false">Al día</button>
             </div>
           </div>
-          <div id="clientsCarousel" class="carousel slide client-carousel" data-bs-interval="false" aria-label="Carrusel de clientes">
-            <div class="carousel-indicators" id="clientIndicators"></div>
-            <div class="carousel-inner" id="clientList" aria-live="polite"></div>
-            <button class="carousel-control-prev client-carousel__control" type="button" data-bs-target="#clientsCarousel" data-bs-slide="prev" aria-label="Clientes anteriores">
+          <div id="clientsCarousel" class="client-carousel" role="region" aria-label="Carrusel de clientes" tabindex="0">
+            <div class="client-carousel__indicators" id="clientIndicators" role="group" aria-label="Elegir cliente"></div>
+            <div class="client-track" id="clientList" aria-live="polite"></div>
+            <button class="client-carousel__control client-carousel__control--prev" type="button" aria-label="Clientes anteriores" aria-controls="clientList">
               <span class="client-carousel__arrow" aria-hidden="true"><i class="bi bi-chevron-left"></i></span>
             </button>
-            <button class="carousel-control-next client-carousel__control" type="button" data-bs-target="#clientsCarousel" data-bs-slide="next" aria-label="Siguientes clientes">
+            <button class="client-carousel__control client-carousel__control--next" type="button" aria-label="Siguientes clientes" aria-controls="clientList">
               <span class="client-carousel__arrow" aria-hidden="true"><i class="bi bi-chevron-right"></i></span>
             </button>
           </div>
@@ -65,7 +63,6 @@
       </main>
     </div>
   </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="Javas/i18n.js"></script>
   <script src="Javas/firebase-config.js"></script>
   <script src="Javas/firebase-loader.js"></script>
