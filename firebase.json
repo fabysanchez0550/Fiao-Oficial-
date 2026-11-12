@@ -1,0 +1,12 @@
+{
+  "hosting": {
+    "public": ".",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**",
+      "Start-FIAO.ps1",
+      "Abrir-FIAO.bat"
+    ]
+  }
+}

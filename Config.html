@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Configuración | Panel FIA'O</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="Style/styles.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="Style/app.css">
+</head>
+<body class="app" data-page="config">
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <a href="index.html" class="logo">FIA'<span class="logo__o">O</span></a>
+      <nav class="side-nav" id="sideNav" aria-label="Panel"></nav>
+      <div class="side-foot">
+        <p id="userName"></p>
+        <button class="btn btn--ghost btn--sm" id="logout" type="button">Cerrar sesión</button>
+      </div>
+    </aside>
+    <div class="scrim" id="scrim"></div>
+
+    <div class="app-main">
+      <header class="topbar">
+        <button class="burger" id="menuBtn" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="sidebar"><span></span><span></span></button>
+        <h1>Configuración</h1>
+        <span class="topbar__biz" id="bizName"></span>
+        <button class="btn btn--primary btn--sm" id="newMov" type="button"><i class="bi bi-plus-lg" aria-hidden="true"></i> Nuevo movimiento</button>
+      </header>
+
+      <main class="app-content">
+        <section class="panel-box" style="max-width:520px">
+          <form class="form form--light" id="settingsForm" novalidate>
+            <h2 class="h3">Tu negocio</h2>
+            <label for="biz">Nombre del negocio</label>
+            <input id="biz" name="biz" type="text"><small class="error" data-for="biz"></small>
+            <label for="uname">Tu nombre</label>
+            <input id="uname" name="name" type="text"><small class="error" data-for="name"></small>
+            <button class="btn btn--primary" type="submit"><i class="bi bi-check2" aria-hidden="true"></i> Guardar cambios</button>
+          </form>
+        </section>
+        <section class="panel-box" style="max-width:520px">
+          <h2 class="h3">Datos</h2>
+          <p class="muted">Tus datos se guardan solo en este navegador. Si los borras, podrás empezar con la cuenta vacía.</p>
+          <button class="btn btn--danger" id="resetBtn" type="button" style="margin-top:1rem"><i class="bi bi-trash3" aria-hidden="true"></i> Borrar mis datos</button>
+        </section>
+      </main>
+    </div>
+  </div>
+    <script src="Javas/i18n.js"></script>
+  <script src="Javas/firebase-config.js"></script>
+  <script src="Javas/firebase-loader.js"></script>
+  <script src="Javas/app.js"></script>
+</body>
+</html>

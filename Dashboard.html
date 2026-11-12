@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Resumen | Panel FIA'O</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="Style/styles.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="Style/app.css">
+</head>
+<body class="app" data-page="dashboard">
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <a href="index.html" class="logo">FIA'<span class="logo__o">O</span></a>
+      <nav class="side-nav" id="sideNav" aria-label="Panel"></nav>
+      <div class="side-foot">
+        <p id="userName"></p>
+        <button class="btn btn--ghost btn--sm" id="logout" type="button">Cerrar sesión</button>
+      </div>
+    </aside>
+    <div class="scrim" id="scrim"></div>
+
+    <div class="app-main">
+      <header class="topbar">
+        <button class="burger" id="menuBtn" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="sidebar"><span></span><span></span></button>
+        <h1>Resumen</h1>
+        <span class="topbar__biz" id="bizName"></span>
+        <button class="btn btn--primary btn--sm" id="newMov" type="button"><i class="bi bi-plus-lg" aria-hidden="true"></i> Nuevo movimiento</button>
+      </header>
+
+      <main class="app-content">
+        <section class="panel-box">
+          <div class="panel-head">
+            <div><h2 id="greet">Hola</h2><p class="muted">Así va tu negocio hoy.</p></div>
+            <div class="toolbar">
+              <button class="btn btn--primary btn--sm" id="quickFiar" type="button"><i class="bi bi-cart-plus" aria-hidden="true"></i> Fiar</button>
+              <button class="btn btn--pay btn--sm" id="quickPago" type="button"><i class="bi bi-cash-coin" aria-hidden="true"></i> Registrar pago</button>
+            </div>
+          </div>
+        </section>
+        <div class="cards">
+          <div class="card"><p><i class="bi bi-wallet2" aria-hidden="true"></i> Total pendiente</p><p class="stat">B/. <span id="sTotal">0.00</span></p></div>
+          <div class="card"><p><i class="bi bi-people" aria-hidden="true"></i> Clientes con saldo</p><p class="stat" id="sCount">0</p></div>
+          <div class="card"><p><i class="bi bi-cash-stack" aria-hidden="true"></i> Cobrado este mes</p><p class="stat">B/. <span id="sPaid">0.00</span></p></div>
+          <div class="card"><p><i class="bi bi-bag-plus" aria-hidden="true"></i> Fiado este mes</p><p class="stat">B/. <span id="sCredit">0.00</span></p></div>
+        </div>
+        <div class="grid-2">
+          <section class="panel-box">
+            <div class="panel-head"><h2>Movimientos recientes</h2><a class="link" data-go="fiados" href="#">Ver todos</a></div>
+            <ul class="rows" id="recent" aria-live="polite"></ul>
+          </section>
+          <section class="panel-box">
+            <div class="panel-head"><h2>Quién debe más</h2><a class="link" data-go="reportes" href="#">Ver reportes</a></div>
+            <div class="bars" id="top"></div>
+          </section>
+        </div>
+      </main>
+    </div>
+  </div>
+   <script src="Javas/i18n.js"></script>
+  <script src="Javas/firebase-config.js"></script>
+  <script src="Javas/firebase-loader.js"></script>
+  <script src="Javas/app.js"></script>
+</body>
+</html>

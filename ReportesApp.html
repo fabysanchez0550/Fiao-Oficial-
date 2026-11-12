@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reportes | FIA'O</title>
+  <meta name="description" content="Resumen de lo que te deben tus clientes.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="Style/styles.css">
+</head>
+<body data-page="reportes">
+
+  <header class="header" id="header">
+    <div class="container header__inner">
+      <a href="index.html" class="logo">FIA'<span class="logo__o">O</span></a>
+      <nav class="nav" id="nav" aria-label="Principal">
+        <a href="index.html">Inicio</a>
+        <a href="Fiados.html">Fiados</a>
+        <a href="Clientes.html">Clientes</a>
+        <a href="Productos.html">Productos</a>
+        <a href="Reportes.html" aria-current="page">Reportes</a>
+        <a href="Contacto.html">Contacto</a>
+        <div class="nav__actions">
+          <a href="Login.html" class="btn btn--ghost">Iniciar sesión</a>
+          <a href="Registro.html" class="btn btn--primary">Crear cuenta</a>
+        </div>
+      </nav>
+      <button class="burger" id="burger" aria-label="Abrir menú" aria-expanded="false" aria-controls="nav"><span></span><span></span></button>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-hero"><div class="container"><h1>Reportes</h1><p>Mira cuánto te deben en total y quién tiene más saldo, para cobrar con orden.</p></div></section>
+    <section class="section">
+      <div class="container">
+        <div class="cards">
+          <div class="card reveal"><p>Total pendiente</p><p class="stat">B/. <span id="repTotal">0.00</span></p></div>
+          <div class="card reveal"><p>Clientes con saldo</p><p class="stat" id="repCount">0</p></div>
+          <div class="card reveal"><p>Quien debe más</p><p class="stat" id="repTop">-</p></div>
+        </div>
+        <div class="panel-box reveal" style="margin-top:1.4rem">
+          <h2 class="h3">Saldo por cliente</h2>
+          <div class="bars" id="bars"></div>
+        </div>
+        <button class="btn btn--ghost" id="resetBtn" type="button" style="margin-top:1.4rem">Restablecer datos de ejemplo</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer__inner">
+      <p class="logo">FIA'<span class="logo__o">O</span></p>
+      <p>© 2026 FIA'O. Hecho para los negocios de Panamá.</p>
+      <nav aria-label="Legal"><a href="#">Privacidad</a><a href="#">Términos</a><a href="#">Accesibilidad</a></nav>
+    </div>
+  </footer>
+
+  <script src="Javas/i18n.js"></script>
+  <script src="Javas/firebase-config.js"></script>
+  <script src="Javas/firebase-loader.js"></script>
+  <script src="Javas/script.js"></script>
+</body>
+</html>

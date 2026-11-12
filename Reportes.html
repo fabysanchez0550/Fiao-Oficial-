@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Reportes | Panel FIA'O</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="Style/styles.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="Style/app.css">
+</head>
+<body class="app" data-page="reportes">
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <a href="index.html" class="logo">FIA'<span class="logo__o">O</span></a>
+      <nav class="side-nav" id="sideNav" aria-label="Panel"></nav>
+      <div class="side-foot">
+        <p id="userName"></p>
+        <button class="btn btn--ghost btn--sm" id="logout" type="button">Cerrar sesión</button>
+      </div>
+    </aside>
+    <div class="scrim" id="scrim"></div>
+
+    <div class="app-main">
+      <header class="topbar">
+        <button class="burger" id="menuBtn" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="sidebar"><span></span><span></span></button>
+        <h1>Reportes</h1>
+        <span class="topbar__biz" id="bizName"></span>
+        <button class="btn btn--primary btn--sm" id="newMov" type="button"><i class="bi bi-plus-lg" aria-hidden="true"></i> Nuevo movimiento</button>
+      </header>
+
+      <main class="app-content">
+        <div class="cards">
+          <div class="card"><p>Total pendiente</p><p class="stat">B/. <span id="rTotal">0.00</span></p></div>
+          <div class="card"><p>Clientes con saldo</p><p class="stat" id="rCount">0</p></div>
+          <div class="card"><p>Cobrado este mes</p><p class="stat">B/. <span id="rPaid">0.00</span></p></div>
+          <div class="card"><p>Fiado este mes</p><p class="stat">B/. <span id="rCredit">0.00</span></p></div>
+        </div>
+        <div class="grid-2">
+          <section class="panel-box"><h2 class="h3">Saldo por cliente</h2><div class="bars" id="rBars"></div></section>
+          <section class="panel-box"><h2 class="h3">Fiado y pagos de este mes</h2><div class="bars" id="rMonth"></div></section>
+        </div>
+        <div><button class="btn btn--ghost" id="exportBtn" type="button"><i class="bi bi-download" aria-hidden="true"></i> Descargar lista de clientes (CSV)</button></div>
+      </main>
+    </div>
+  </div>
+    <script src="Javas/i18n.js"></script>
+  <script src="Javas/firebase-config.js"></script>
+  <script src="Javas/firebase-loader.js"></script>
+  <script src="Javas/app.js"></script>
+</body>
+</html>
