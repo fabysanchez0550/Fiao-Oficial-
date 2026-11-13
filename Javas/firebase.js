@@ -34,6 +34,13 @@ export async function signInAccount(email, password) {
   return credential.user;
 }
 
+export async function updateAccountProfile(name) {
+  await persistenceReady;
+  if (!auth.currentUser) throw new Error("No hay una cuenta activa para actualizar.");
+  await updateProfile(auth.currentUser, { displayName: name });
+  return auth.currentUser;
+}
+
 export async function currentUser() {
   await persistenceReady;
   if (auth.currentUser) return auth.currentUser;

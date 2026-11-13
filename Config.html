@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex">
-  <title>Configuración | Panel FIA'O</title>
+  <title>Mi perfil | Panel FIA'O</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&display=swap" rel="stylesheet">
@@ -27,31 +27,78 @@
     <div class="app-main">
       <header class="topbar">
         <button class="burger" id="menuBtn" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="sidebar"><span></span><span></span></button>
-        <h1>Configuración</h1>
+        <h1>Mi perfil</h1>
         <span class="topbar__biz" id="bizName"></span>
-        <button class="btn btn--primary btn--sm" id="newMov" type="button"><i class="bi bi-plus-lg" aria-hidden="true"></i> Nuevo movimiento</button>
       </header>
 
-      <main class="app-content">
-        <section class="panel-box" style="max-width:520px">
-          <form class="form form--light" id="settingsForm" novalidate>
-            <h2 class="h3">Tu negocio</h2>
-            <label for="biz">Nombre del negocio</label>
-            <input id="biz" name="biz" type="text"><small class="error" data-for="biz"></small>
-            <label for="uname">Tu nombre</label>
-            <input id="uname" name="name" type="text"><small class="error" data-for="name"></small>
-            <button class="btn btn--primary" type="submit"><i class="bi bi-check2" aria-hidden="true"></i> Guardar cambios</button>
-          </form>
+      <main class="app-content profile-content">
+        <section class="profile-card panel-box">
+          <div class="profile-card__avatar-wrap">
+            <div class="profile-card__avatar" id="profileAvatar" aria-label="Foto de perfil"></div>
+            <input class="visually-hidden" id="profilePhotoInput" type="file" accept="image/jpeg,image/png,image/webp,image/gif">
+            <label class="profile-card__photo-button" for="profilePhotoInput" aria-label="Cambiar foto de perfil" title="Cambiar foto de perfil"><i class="bi bi-camera" aria-hidden="true"></i></label>
+          </div>
+          <div class="profile-card__identity">
+            <span class="profile-card__status"><i class="bi bi-check-circle-fill" aria-hidden="true"></i> Cuenta FIA'O</span>
+            <h2 id="profileName"></h2>
+            <p class="profile-card__email"><i class="bi bi-envelope" aria-hidden="true"></i><span id="profileEmail"></span></p>
+            <p class="profile-card__business"><i class="bi bi-shop" aria-hidden="true"></i><span id="profileBusiness"></span></p>
+            <small class="muted profile-card__photo-note">La foto se guarda en este navegador.</small>
+            <small class="error" id="profilePhotoError" role="alert"></small>
+          </div>
+          <button class="btn btn--ghost btn--sm profile-card__edit" id="editProfile" type="button" aria-label="Editar perfil"><i class="bi bi-pencil-square" aria-hidden="true"></i></button>
         </section>
-        <section class="panel-box" style="max-width:520px">
-          <h2 class="h3">Datos</h2>
-          <p class="muted">Tus datos se guardan solo en este navegador. Si los borras, podrás empezar con la cuenta vacía.</p>
-          <button class="btn btn--danger" id="resetBtn" type="button" style="margin-top:1rem"><i class="bi bi-trash3" aria-hidden="true"></i> Borrar mis datos</button>
+
+        <div class="profile-columns">
+          <section class="panel-box profile-panel">
+            <div class="panel-head">
+              <div>
+                <h2 class="h3">Información de tu cuenta</h2>
+                <p class="muted">Mantén al día tus datos y los de tu negocio.</p>
+              </div>
+            </div>
+            <form class="form form--light profile-form" id="settingsForm" novalidate>
+              <label for="uname">Tu nombre</label>
+              <input id="uname" name="name" type="text" autocomplete="name"><small class="error" data-for="name"></small>
+              <label for="profileEmailInput">Correo de acceso</label>
+              <input id="profileEmailInput" type="email" readonly aria-describedby="emailHelp">
+              <small class="muted" id="emailHelp">El correo se usa para iniciar sesión.</small>
+              <label for="biz">Nombre del negocio</label>
+              <input id="biz" name="biz" type="text" autocomplete="organization"><small class="error" data-for="biz"></small>
+              <p class="form__error" id="profileFormError" role="alert" hidden></p>
+              <button class="btn btn--primary" type="submit"><i class="bi bi-check2" aria-hidden="true"></i> Guardar cambios</button>
+            </form>
+          </section>
+
+          <aside class="profile-aside">
+            <section class="profile-summary">
+              <h2>Tu negocio</h2>
+              <div class="profile-summary__item"><span><i class="bi bi-people" aria-hidden="true"></i> Clientes</span><strong id="profileClientCount">0</strong></div>
+              <div class="profile-summary__item"><span><i class="bi bi-wallet2" aria-hidden="true"></i> Saldo pendiente</span><strong id="profileCreditTotal">B/. 0.00</strong></div>
+              <div class="profile-summary__item"><span><i class="bi bi-journal-text" aria-hidden="true"></i> Movimientos</span><strong id="profileMovementCount">0</strong></div>
+            </section>
+            <section class="panel-box profile-data">
+              <h2 class="h3">Tus datos</h2>
+              <p class="muted">La información de tu negocio se guarda en este navegador.</p>
+              <button class="btn btn--danger btn--sm" id="resetBtn" type="button"><i class="bi bi-trash3" aria-hidden="true"></i> Borrar mis datos</button>
+            </section>
+          </aside>
+        </div>
+
+        <section class="panel-box profile-activity">
+          <div class="panel-head">
+            <div>
+              <h2 class="h3">Actividad reciente</h2>
+              <p class="muted" id="profileActivityCount"></p>
+            </div>
+            <a class="btn btn--ghost btn--sm" href="Fiados.html">Ver fiados</a>
+          </div>
+          <ul class="rows" id="profileActivity" aria-live="polite"></ul>
         </section>
       </main>
     </div>
   </div>
-    <script src="Javas/i18n.js"></script>
+  <script src="Javas/i18n.js"></script>
   <script src="Javas/firebase-config.js"></script>
   <script src="Javas/firebase-loader.js"></script>
   <script src="Javas/app.js"></script>

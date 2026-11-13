@@ -50,7 +50,7 @@
           <div class="ledger reveal" id="demo" aria-label="Demostración de la libreta">
             <div class="ledger__top">
               <div><p class="ledger__name">Doña Rosa</p><p class="ledger__meta">Cliente desde marzo</p></div>
-              <span class="badge"><i class="bi bi-eye" aria-hidden="true"></i> Vista previa</span>
+              <a class="badge preview-trigger" href="assets/Telefono%20fiao.avif" data-bs-toggle="modal" data-bs-target="#previewModal" aria-haspopup="dialog" aria-controls="previewModal"><i class="bi bi-eye" aria-hidden="true"></i> Vista previa</a>
             </div>
             <p class="ledger__label">Debe</p>
             <p class="ledger__amount">B/. <span id="amount">48.50</span></p>
@@ -126,9 +126,24 @@
     </div>
   </footer>
 
+  <div class="modal fade fiao-preview-modal" id="previewModal" tabindex="-1" aria-labelledby="previewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title" id="previewModalLabel">Vista previa de FIA'O</h2>
+          <button type="button" class="modal-close" data-bs-dismiss="modal" aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
+        </div>
+        <div class="modal-body">
+          <img src="assets/Telefono%20fiao.avif" alt="App FIA'O en un celular mostrando la libreta de clientes">
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="Javas/i18n.js"></script>
   <script src="Javas/firebase-config.js"></script>
   <script src="Javas/firebase-loader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="Javas/script.js"></script>
 </body>
 </html>

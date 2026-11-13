@@ -14,7 +14,7 @@ const PANEL = {
   productos: { file: "Productos.html", label: "Inventario", icon: "bi bi-basket2" },
   ventas: { file: "Ventas.html", label: "Ventas", icon: "bi bi-cart-check" },
   reportes: { file: "Reportes.html", label: "Reportes", icon: "bi bi-bar-chart" },
-  config: { file: "Config.html", label: "Configuración", icon: "bi bi-gear" }
+  config: { file: "Config.html", label: "Mi perfil", icon: "bi bi-person-circle" }
 };
 const $ = (s, c = document) => c.querySelector(s);
 const $$ = (s, c = document) => [...c.querySelectorAll(s)];
@@ -1000,17 +1000,107 @@ function pageReportes() {
 
 /* ========== CONFIGURACIÓN ========== */
 function pageConfig() {
+  const form = $("#settingsForm");
+  const photoInput = $("#profilePhotoInput");
+  const photoKey = `fiao-profile-photo:${encodeURIComponent(accountEmail)}`;
+  const avatar = $("#profileAvatar");
+  const setAvatar = photo => {
+    avatar.replaceChildren();
+    if (photo) {
+      const image = new Image();
+      image.src = photo;
+      image.alt = tr("Foto de perfil de {name}", { name: session.name });
+      avatar.append(image);
+    } else {
+      avatar.textContent = session.name.trim().split(/\s+/).slice(0, 2).map(part => part.charAt(0)).join("").toUpperCase();
+    }
+  };
+  const updateSummary = () => {
+    $("#profileName").textContent = session.name;
+    $("#profileEmail").textContent = session.email;
+    $("#profileBusiness").textContent = tr(data.business);
+    $("#profileClientCount").textContent = data.clients.length;
+    $("#profileCreditTotal").textContent = money(totalDebt());
+    $("#profileMovementCount").textContent = data.movements.length;
+    const activity = $("#profileActivity");
+    const recent = data.movements.slice().sort((a, b) => (b.ts || 0) - (a.ts || 0)).slice(0, 4);
+    activity.replaceChildren();
+    if (!recent.length) activity.append(h("li", "empty", tr("Aún no hay movimientos. Registra el primero.")));
+    recent.forEach(movement => activity.append(movRow(movement)));
+    $("#profileActivityCount").textContent = tr(recent.length === 1 ? "{n} movimiento reciente" : "{n} movimientos recientes", { n: recent.length });
+    let photo = "";
+    try {
+      photo = localStorage.getItem(photoKey) || "";
+    } catch (error) {
+      console.error("No se pudo leer la foto de perfil guardada.", error);
+      $("#profilePhotoError").textContent = tr("No se pudo cargar la foto de perfil desde este navegador.");
+    }
+    setAvatar(photo);
+  };
   $("#biz").value = tr(data.business);
   $("#uname").value = session.name;
-  handleForm($("#settingsForm"), v => {
-    data.business = v.biz.trim();
-    session.name = v.name.trim();
-    saveData();
-    try { localStorage.setItem(SKEY, JSON.stringify(session)); } catch (e) {}
+  $("#profileEmailInput").value = session.email;
+  updateSummary();
+  photoInput.addEventListener("change", async () => {
+    const file = photoInput.files[0];
+    if (!file) return;
+    $("#profilePhotoError").textContent = "";
+    try {
+      const imageData = await clientPhotoFromFile(file);
+      localStorage.setItem(photoKey, imageData);
+      setAvatar(imageData);
+      $("#profilePhotoError").textContent = "";
+      toast(tr("Foto de perfil actualizada"));
+    } catch (error) {
+      $("#profilePhotoError").textContent = error.message;
+    } finally {
+      photoInput.value = "";
+    }
+  });
+  $("#editProfile").addEventListener("click", () => {
+    form.scrollIntoView({ behavior: "smooth", block: "center" });
+    $("#uname").focus({ preventScroll: true });
+  });
+  handleForm(form, values => {
+    void saveProfile(values);
+  });
+  const saveProfile = async values => {
+    const previousBusiness = data.business;
+    const previousName = session.name;
+    data.business = values.biz.trim();
+    session.name = values.name.trim();
+    if (!saveData()) {
+      data.business = previousBusiness;
+      session.name = previousName;
+      $("#profileFormError").textContent = tr("No se pudo guardar. Libera espacio en el navegador e inténtalo otra vez.");
+      $("#profileFormError").hidden = false;
+      return;
+    }
+    try {
+      localStorage.setItem(SKEY, JSON.stringify(session));
+      if (window.FIAO_FIREBASE_CONFIGURED) {
+        const firebase = await window.FIAO_FIREBASE_READY;
+        if (!firebase) throw new Error("Firebase no está disponible.");
+        await firebase.updateAccountProfile(session.name);
+      }
+    } catch (error) {
+      data.business = previousBusiness;
+      session.name = previousName;
+      if (!saveData()) console.error("No se pudieron restaurar los datos del perfil.");
+      try { localStorage.setItem(SKEY, JSON.stringify(session)); } catch (storageError) {
+        console.error("No se pudo restaurar el perfil guardado.", storageError);
+      }
+      console.error("No se pudo actualizar el perfil.", error);
+      $("#profileFormError").textContent = tr("No se pudo guardar el perfil. Inténtalo otra vez.");
+      $("#profileFormError").hidden = false;
+      return;
+    }
+    $("#profileFormError").hidden = true;
     $("#bizName").textContent = tr(data.business);
     $("#userName").textContent = session.name;
+    updateSummary();
     toast(tr("Cambios guardados"));
-  });
+  };
   $("#resetBtn").addEventListener("click", () => {
     if (!confirm(tr("¿Borrar todos tus datos y volver a los de ejemplo?"))) return;
     try { localStorage.removeItem(KEY); } catch (e) {}
