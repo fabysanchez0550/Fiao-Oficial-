@@ -3,31 +3,70 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Page Not Found</title>
-
-    <style media="screen">
-      body { background: #ECEFF1; color: rgba(0,0,0,0.87); font-family: Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
-      #message { background: white; max-width: 360px; margin: 100px auto 16px; padding: 32px 24px 16px; border-radius: 3px; }
-      #message h3 { color: #888; font-weight: normal; font-size: 16px; margin: 16px 0 12px; }
-      #message h2 { color: #ffa100; font-weight: bold; font-size: 16px; margin: 0 0 8px; }
-      #message h1 { font-size: 22px; font-weight: 300; color: rgba(0,0,0,0.6); margin: 0 0 16px;}
-      #message p { line-height: 140%; margin: 16px 0 24px; font-size: 14px; }
-      #message a { display: block; text-align: center; background: #039be5; text-transform: uppercase; text-decoration: none; color: white; padding: 16px; border-radius: 4px; }
-      #message, #message a { box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); }
-      #load { color: rgba(0,0,0,0.4); text-align: center; font-size: 13px; }
-      @media (max-width: 600px) {
-        body, #message { margin-top: 0; background: white; box-shadow: none; }
-        body { border-top: 16px solid #ffa100; }
+    <title>Esta página no está en la libreta | FIA'O</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&family=Montserrat:wght@600;700;800&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+      :root { color-scheme: light; --red: #B91C1C; --yellow: #FFBF32; --cream: #FEF3C7; --coffee: #482D1F; --paper: #FFFBF0; }
+      * { box-sizing: border-box; }
+      body {
+        display: grid;
+        min-height: 100vh;
+        margin: 0;
+        padding: clamp(1.25rem, 5vw, 4rem);
+        place-items: center;
+        overflow: hidden;
+        background: var(--cream);
+        color: var(--coffee);
+        font-family: "Outfit", "DM Sans", sans-serif;
       }
+      #message {
+        position: relative;
+        width: min(100%, 900px);
+        min-height: min(590px, 82vh);
+        padding: clamp(1.5rem, 5vw, 4rem);
+        overflow: hidden;
+        border: 1px solid color-mix(in srgb, var(--coffee) 18%, transparent);
+        border-radius: 5px 36px 5px 36px;
+        background: var(--paper);
+      }
+      #message::after {
+        position: absolute;
+        top: 50%;
+        right: -9rem;
+        width: clamp(280px, 46vw, 520px);
+        aspect-ratio: 1;
+        border: 1px solid color-mix(in srgb, var(--coffee) 25%, transparent);
+        border-radius: 48% 52% 42% 58% / 54% 43% 57% 46%;
+        background: var(--yellow);
+        content: "";
+        transform: translateY(-50%) rotate(-12deg);
+      }
+      #message > * { position: relative; z-index: 1; }
+      #message .brand { margin: 0 0 clamp(3rem, 9vh, 6rem); color: var(--red); font: 800 1.6rem/1 "DM Sans", sans-serif; letter-spacing: -.08em; }
+      #message .brand span { display: inline-grid; width: .9em; aspect-ratio: 1; place-items: center; border-radius: 50%; background: var(--coffee); color: var(--yellow); font-size: .72em; letter-spacing: 0; vertical-align: .1em; }
+      #message h2 { margin: 0 0 1rem; color: var(--red); font: 700 .9rem "DM Sans", sans-serif; letter-spacing: .12em; text-transform: uppercase; }
+      #message h1 { max-width: 12ch; margin: 0 0 1.1rem; font: 800 clamp(2.7rem, 7vw, 5.5rem)/.98 "Montserrat", "DM Sans", sans-serif; letter-spacing: -.065em; }
+      #message p { max-width: 42ch; margin: 0 0 1.6rem; font-size: clamp(1rem, 1.5vw, 1.2rem); line-height: 1.55; }
+      #message a { display: inline-flex; min-height: 50px; align-items: center; padding: .8rem 1.25rem; border-radius: 9px; background: var(--red); color: var(--cream); font: 700 .95rem "DM Sans", sans-serif; text-decoration: none; transition: transform .2s, background .2s; }
+      #message a:hover { transform: translateY(-2px); background: var(--coffee); }
+      #message a:focus-visible { outline: 3px solid var(--coffee); outline-offset: 4px; }
+      @media (max-width: 600px) {
+        #message { min-height: min(620px, 88vh); padding: 1.5rem; border-radius: 4px 24px 4px 24px; }
+        #message::after { top: auto; right: -8rem; bottom: -7rem; width: 340px; transform: rotate(-12deg); }
+        #message .brand { margin-bottom: 4rem; }
+      }
+      @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; } }
     </style>
   </head>
   <body>
     <div id="message">
-      <h2>404</h2>
-      <h1>Page Not Found</h1>
-      <p>The specified file was not found on this website. Please check the URL for mistakes and try again.</p>
-      <h3>Why am I seeing this?</h3>
-      <p>This page was generated by the Firebase Command-Line Interface. To modify it, edit the <code>404.html</code> file in your project's configured <code>public</code> directory.</p>
+      <p class="brand">FIA'<span>O</span></p>
+      <h2>404 · Página no encontrada</h2>
+      <h1>Esa página no está en la libreta.</h1>
+      <p>Puede que el enlace esté viejo o que la dirección tenga algún error. Vuelve al inicio y seguimos desde ahí.</p>
+      <a href="/">Volver a FIA'O <span aria-hidden="true">&nbsp;→</span></a>
     </div>
   </body>
 </html>
