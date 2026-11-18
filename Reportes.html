@@ -41,16 +41,27 @@
         </div>
         <div class="report-chart-controls">
           <label for="reportChartType">Tipo de gráfica</label>
-          <select id="reportChartType">
+          <select id="reportChartType" aria-describedby="reportChartTypeHint">
             <option value="columnas" selected>Columnas</option>
             <option value="barras">Barras horizontales</option>
             <option value="circular">Circular</option>
             <option value="anillo">Anillo</option>
           </select>
-          <p>La selección se aplica a ambas gráficas.</p>
+          <p id="reportChartTypeHint">La selección se aplica a ambas gráficas.</p>
         </div>
         <div class="grid-2">
-          <section class="panel-box"><h2 class="h3">Saldo por cliente</h2><div class="report-chart" id="rBars"></div></section>
+          <section class="panel-box">
+            <div class="report-chart-panel__head">
+              <div>
+                <h2 class="h3">Saldo por cliente</h2>
+                <p class="report-chart__hint" id="reportClientChartHint" hidden></p>
+              </div>
+              <button class="btn btn--ghost btn--sm" id="reportAllClients" type="button" hidden>
+                <i class="bi bi-people" aria-hidden="true"></i> Ver todos
+              </button>
+            </div>
+            <div class="report-chart" id="rBars"></div>
+          </section>
           <section class="panel-box"><h2 class="h3">Fiado y pagos de este mes</h2><div class="report-chart" id="rMonth"></div></section>
         </div>
         <div><button class="btn btn--ghost" id="exportBtn" type="button"><i class="bi bi-download" aria-hidden="true"></i> Descargar lista de clientes (CSV)</button></div>

@@ -178,6 +178,9 @@ const EN = {
   "Circular": "Pie chart", "Anillo": "Doughnut", "La selección se aplica a ambas gráficas.": "The selection applies to both charts.",
   "Todavía no hay datos para mostrar.": "There is no data to display yet.",
   "Gráfica de {type}": "{type} chart", "Distribución de datos por categoría": "Data distribution by category", "Otros": "Other", "Total": "Total",
+  "Todos los clientes": "All clients", "Ordenar alfabéticamente": "Sort alphabetically", "Nombre A–Z": "Name A–Z", "Nombre Z–A": "Name Z–A",
+  "Se muestran los 10 saldos pendientes más altos.": "Showing the 10 highest outstanding balances.",
+  "La gráfica circular muestra cinco saldos y agrupa el resto como “Otros”.": "The pie chart shows the five highest balances and groups the rest as “Other”.",
 
   /* --- Datos de ejemplo --- */
   "Víveres": "Groceries", "Compra de la semana": "Weekly shopping",

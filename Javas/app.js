@@ -1081,11 +1081,71 @@ function pageVentas() {
 /* ========== REPORTES ========== */
 function pageReportes() {
   const chartTypeSelect = $("#reportChartType");
+  const allClientsButton = $("#reportAllClients");
+  const chartHint = $("#reportClientChartHint");
+  const clientDialog = makeDialog("reportClientsDialog", tr("Todos los clientes"), "");
+  clientDialog.classList.add("app-dialog--wide");
+  const dialogBox = $(".app-dialog__box", clientDialog);
+  const sortLabel = h("label", "", tr("Ordenar alfabéticamente"));
+  const sortSelect = h("select", "report-client-dialog__sort");
+  sortSelect.id = "reportClientSort";
+  sortLabel.htmlFor = sortSelect.id;
+  [["az", "Nombre A–Z"], ["za", "Nombre Z–A"]].forEach(([value, label]) => {
+    const option = h("option", "", tr(label));
+    option.value = value;
+    sortSelect.append(option);
+  });
+  const sortControls = h("div", "report-client-dialog__toolbar");
+  sortControls.append(sortLabel, sortSelect);
+  const clientCount = h("p", "report-client-dialog__count muted");
+  clientCount.setAttribute("aria-live", "polite");
+  const clientList = h("ul", "report-client-list");
+  dialogBox.append(sortControls, clientCount, clientList);
+  const clientCollator = new Intl.Collator(LOCALE, { sensitivity: "base" });
+
+  const renderClientList = () => {
+    const direction = sortSelect.value === "za" ? -1 : 1;
+    const clients = data.clients.slice().sort((a, b) => direction * clientCollator.compare(String(a.name || ""), String(b.name || "")));
+    clientCount.textContent = tr(clients.length === 1 ? "{n} cliente" : "{n} clientes", { n: clients.length });
+    clientList.replaceChildren();
+    if (!clients.length) {
+      clientList.append(h("li", "empty", tr("Todavía no tienes clientes.")));
+      return;
+    }
+
+    clients.forEach(client => {
+      const debt = Math.max(0, Number(client.debt) || 0);
+      const details = h("div", "report-client-list__details");
+      details.append(
+        h("strong", "", String(client.name || "")),
+        h("small", "", debt > 0 ? tr("Saldo pendiente") : tr("Cuenta al día"))
+      );
+      const amount = h("strong", `report-client-list__amount ${debt > 0 ? "is-pending" : "is-clear"}`, money(debt));
+      const row = h("li", "report-client-list__item");
+      row.append(details, amount);
+      clientList.append(row);
+    });
+  };
+  sortSelect.addEventListener("change", renderClientList);
+  allClientsButton.addEventListener("click", () => {
+    renderClientList();
+    clientDialog.showModal();
+  });
+
   let chartType = chartTypeSelect.value || "columnas";
   const renderCharts = () => {
+    const clientsWithDebt = data.clients
+      .filter(client => client.debt > 0)
+      .sort((a, b) => b.debt - a.debt);
+    const usesPieChart = chartType === "circular" || chartType === "anillo";
+    allClientsButton.hidden = data.clients.length <= 10;
+    chartHint.hidden = usesPieChart ? clientsWithDebt.length <= 6 : clientsWithDebt.length <= 10;
+    chartHint.textContent = usesPieChart
+      ? tr("La gráfica circular muestra cinco saldos y agrupa el resto como “Otros”.")
+      : tr("Se muestran los 10 saldos pendientes más altos.");
     renderReportChart(
       $("#rBars"),
-      data.clients.filter(c => c.debt > 0).sort((a, b) => b.debt - a.debt).map(c => ({ label: c.name, value: c.debt })),
+      (usesPieChart ? clientsWithDebt : clientsWithDebt.slice(0, 10)).map(client => ({ label: client.name, value: client.debt })),
       chartType
     );
     renderReportChart($("#rMonth"), [
