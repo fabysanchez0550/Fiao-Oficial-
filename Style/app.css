@@ -438,11 +438,41 @@
 .app[data-page="ventas"] .sale-panel {
   position: relative;
   overflow: hidden;
+  max-width: none;
+  padding: clamp(1.2rem, 3vw, 2.4rem);
   border-top: 4px solid var(--primary);
   border-radius: 5px 24px 5px 24px;
   box-shadow: 0 18px 42px rgba(72, 45, 31, .07);
 }
-.app[data-page="ventas"] .sale-panel__head h2 { font-size: clamp(1.45rem, 3vw, 2rem); }
+.app[data-page="ventas"] .sale-panel__head { margin-bottom: clamp(1.2rem, 2.5vw, 1.8rem); }
+.app[data-page="ventas"] .sale-panel__head h2 {
+  margin: .55rem 0 .45rem;
+  font-size: clamp(1.45rem, 3vw, 2rem);
+}
+.app[data-page="ventas"] .sale-panel__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  color: var(--primary);
+  font: 700 .76rem var(--font-ui);
+  letter-spacing: .12em;
+}
+.app[data-page="ventas"] .sale-panel__eyebrow .bi { color: var(--primary); }
+.app[data-page="ventas"] .sale-panel__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(250px, .85fr);
+  align-items: stretch;
+  gap: clamp(1rem, 2.4vw, 2rem);
+}
+.app[data-page="ventas"] .sale-form {
+  min-width: 0;
+  align-content: start;
+  gap: 1rem;
+  padding: clamp(1rem, 2vw, 1.5rem);
+  border: 1px solid var(--line);
+  border-radius: 18px 5px 18px 5px;
+  background: color-mix(in srgb, var(--soft) 18%, var(--bg));
+}
 .app[data-page="ventas"] .sale-form__field label { font: 700 .9rem var(--font-ui); }
 .app[data-page="ventas"] .sale-form__field input,
 .app[data-page="ventas"] .sale-form__field select {
@@ -465,6 +495,148 @@
 .app[data-page="ventas"] .sale-form__footer {
   border-top-color: var(--line);
 }
+.app[data-page="ventas"] .sale-form__footer .btn {
+  min-height: 48px;
+  margin-top: 0;
+}
+.app[data-page="ventas"] .sale-photo {
+  position: relative;
+  min-width: 0;
+  min-height: 100%;
+  overflow: hidden;
+  margin: 0;
+  aspect-ratio: 4 / 5;
+  border-radius: 5px 20px 5px 20px;
+  background: var(--ink);
+  --sale-story-duration: 6s;
+}
+.app[data-page="ventas"] .sale-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: opacity .25s ease, transform .45s ease;
+}
+.app[data-page="ventas"] .sale-photo.is-changing img { opacity: .7; transform: scale(1.015); }
+.app[data-page="ventas"] .sale-photo__progress {
+  position: absolute;
+  top: .55rem;
+  right: .8rem;
+  left: .8rem;
+  z-index: 3;
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: .3rem;
+}
+.app[data-page="ventas"] .sale-photo__segment {
+  min-width: 0;
+  padding: .3rem 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.app[data-page="ventas"] .sale-photo__segment span {
+  position: relative;
+  display: block;
+  height: 3px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--soft) 48%, transparent);
+}
+.app[data-page="ventas"] .sale-photo__segment span::after {
+  position: absolute;
+  inset: 0;
+  transform: scaleX(0);
+  transform-origin: left;
+  background: var(--soft);
+  content: "";
+}
+.app[data-page="ventas"] .sale-photo__segment[data-story-state="complete"] span::after { transform: scaleX(1); }
+.app[data-page="ventas"] .sale-photo__segment[data-story-state="active"] span::after {
+  animation: sale-story-progress var(--sale-story-duration) linear both;
+}
+.app[data-page="ventas"] .sale-photo.is-paused .sale-photo__segment[data-story-state="active"] span::after { animation-play-state: paused; }
+.app[data-page="ventas"] .sale-photo__controls {
+  position: absolute;
+  top: 1.55rem;
+  right: .8rem;
+  z-index: 3;
+  display: flex;
+  gap: .35rem;
+}
+.app[data-page="ventas"] .sale-photo__control {
+  display: grid;
+  width: 2.1rem;
+  height: 2.1rem;
+  padding: 0;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--soft) 60%, transparent);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--ink) 55%, transparent);
+  color: var(--soft);
+  cursor: pointer;
+  transition: background .2s, color .2s, transform .2s;
+}
+.app[data-page="ventas"] .sale-photo__control:hover {
+  transform: translateY(-1px);
+  background: var(--soft);
+  color: var(--ink);
+}
+.app[data-page="ventas"] .sale-photo__control:focus-visible,
+.app[data-page="ventas"] .sale-photo__segment:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.app[data-page="ventas"] .sale-photo__badge {
+  position: absolute;
+  top: 1.55rem;
+  left: 1rem;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  padding: .5rem .75rem;
+  border: 1px solid color-mix(in srgb, var(--ink) 12%, transparent);
+  border-radius: 999px;
+  background: var(--soft);
+  color: var(--ink);
+  font: 700 .78rem var(--font-ui);
+}
+.app[data-page="ventas"] .sale-photo__caption {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 2;
+  padding: 3rem 1.2rem 1.1rem;
+  background: linear-gradient(transparent, color-mix(in srgb, var(--ink) 90%, transparent));
+  color: var(--soft);
+}
+.app[data-page="ventas"] .sale-photo__caption p {
+  max-width: 18ch;
+  margin: 0 0 .65rem;
+  font: 700 clamp(1.2rem, 2vw, 1.65rem)/1.15 var(--font-head);
+  letter-spacing: -.035em;
+}
+.app[data-page="ventas"] .sale-photo__caption a {
+  color: color-mix(in srgb, var(--soft) 85%, transparent);
+  font: 500 .75rem var(--font-ui);
+  text-underline-offset: .2em;
+}
+.app[data-page="ventas"] .sale-photo__caption a:hover { color: var(--accent); }
+.app[data-page="ventas"] .sale-photo__caption .sale-photo__credit {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  color: color-mix(in srgb, var(--soft) 66%, transparent);
+  font-size: .68rem;
+  opacity: .8;
+  text-decoration: none;
+}
+.app[data-page="ventas"] .sale-photo__caption .sale-photo__credit:hover { color: var(--soft); opacity: 1; }
+@keyframes sale-story-progress { to { transform: scaleX(1); } }
 
 .app[data-page="reportes"] .app-content > .cards .card:first-child {
   background: var(--ink);
@@ -527,8 +699,15 @@
 @media (max-width: 900px) {
   .app-shell { grid-template-columns: minmax(0, 1fr); }
   .sidebar { border-right: 0; border-left: 5px solid var(--primary); }
+  .app[data-page="ventas"] .sidebar { position: fixed; }
+  .app[data-page="ventas"] .app-main { grid-row: 1; }
   .app-content { padding: 1rem; }
   .app[data-page="dashboard"] .app-content > .panel-box:first-child { border-radius: 5px 22px 5px 22px; }
+}
+
+@media (max-width: 1000px) {
+  .app[data-page="ventas"] .sale-panel__layout { grid-template-columns: 1fr; }
+  .app[data-page="ventas"] .sale-photo { min-height: 0; aspect-ratio: 16 / 9; }
 }
 
 @media (max-width: 520px) {
@@ -538,6 +717,8 @@
   .app-content .card { min-height: 125px; padding: 1rem; }
   .app[data-page="clientes"] .client-carousel { border-radius: 22px 5px 22px 5px; }
   .app[data-page="ventas"] .sale-panel { border-radius: 4px 18px 4px 18px; }
+  .app[data-page="ventas"] .sale-photo { aspect-ratio: 4 / 3; }
+  .app[data-page="ventas"] .sale-photo__caption { padding: 2rem 1rem .9rem; }
   .app[data-page="config"] .profile-card { border-radius: 4px 18px 4px 18px; }
 }
 
@@ -550,4 +731,10 @@
   .product-card__body,
   .sale-form__field input,
   .sale-form__field select { transition-duration: .01ms; }
+  .app[data-page="ventas"] .sale-photo img,
+  .app[data-page="ventas"] .sale-photo__control { transition-duration: .01ms; }
+  .app[data-page="ventas"] .sale-photo__segment[data-story-state="active"] span::after {
+    animation: none;
+    transform: scaleX(1);
+  }
 }

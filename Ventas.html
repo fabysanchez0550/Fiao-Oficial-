@@ -35,52 +35,80 @@
         <section class="panel-box sale-panel">
           <div class="panel-head sale-panel__head">
             <div>
+              <span class="sale-panel__eyebrow"><i class="bi bi-receipt" aria-hidden="true"></i> VENTAS</span>
               <h2 class="h3">Registrar un fiado</h2>
               <p class="muted">Elige un cliente y lo que se lleva. Su saldo y el inventario se actualizan al guardar.</p>
             </div>
           </div>
 
-          <form class="form form--light sale-form" id="saleForm" novalidate>
-            <div class="sale-form__grid">
-              <div class="sale-form__field">
-                <label for="saleClient">Cliente</label>
-                <div class="sale-form__client">
-                  <select id="saleClient" name="client"></select>
-                  <button class="btn btn--ghost btn--sm" id="addSaleClient" type="button"><i class="bi bi-person-plus" aria-hidden="true"></i> Nuevo cliente</button>
+          <div class="sale-panel__layout">
+            <form class="form form--light sale-form" id="saleForm" novalidate>
+              <div class="sale-form__grid">
+                <div class="sale-form__field">
+                  <label for="saleClient">Cliente</label>
+                  <div class="sale-form__client">
+                    <select id="saleClient" name="client"></select>
+                    <button class="btn btn--ghost btn--sm" id="addSaleClient" type="button"><i class="bi bi-person-plus" aria-hidden="true"></i> Nuevo cliente</button>
+                  </div>
+                  <small class="error" data-for="client"></small>
                 </div>
-                <small class="error" data-for="client"></small>
+
+                <div class="sale-form__field">
+                  <label for="saleProduct">Producto</label>
+                  <select id="saleProduct" name="product"></select>
+                  <small class="error" data-for="product"></small>
+                </div>
+
+                <div class="sale-form__field">
+                  <label for="saleQuantity">Cantidad</label>
+                  <input id="saleQuantity" name="quantity" type="number" step="1" min="1" value="1" inputmode="numeric">
+                  <small class="error" data-for="quantity"></small>
+                </div>
+
+                <div class="sale-form__field">
+                  <label for="saleDate">Fecha</label>
+                  <input id="saleDate" name="date" type="date">
+                  <small class="error" data-for="date"></small>
+                </div>
               </div>
 
-              <div class="sale-form__field">
-                <label for="saleProduct">Producto</label>
-                <select id="saleProduct" name="product"></select>
-                <small class="error" data-for="product"></small>
-              </div>
+              <p class="muted sale-form__notice" id="saleStockNotice" aria-live="polite"></p>
+              <p class="form__error" id="saleFormError" role="alert" hidden></p>
 
-              <div class="sale-form__field">
-                <label for="saleQuantity">Cantidad</label>
-                <input id="saleQuantity" name="quantity" type="number" step="1" min="1" value="1" inputmode="numeric">
-                <small class="error" data-for="quantity"></small>
+              <div class="sale-form__footer">
+                <div class="sale-total">
+                  <span>Total del fiado</span>
+                  <output id="saleTotal" aria-live="polite">B/. 0.00</output>
+                </div>
+                <button class="btn btn--primary" type="submit"><i class="bi bi-check2-circle" aria-hidden="true"></i> Registrar fiado</button>
               </div>
+            </form>
 
-              <div class="sale-form__field">
-                <label for="saleDate">Fecha</label>
-                <input id="saleDate" name="date" type="date">
-                <small class="error" data-for="date"></small>
+            <figure class="sale-photo">
+              <img data-story-image src="assets/ventas-panama.jpg" alt="Dos cocos frescos servidos en un puesto de Ciudad de Panamá." width="1100" height="1400" decoding="async">
+              <div class="sale-photo__progress" data-story-progress role="group" aria-label="Historias de Panamá">
+                <button class="sale-photo__segment" type="button" data-story-index="0" data-story-state="active" aria-label="Mostrar foto 1" aria-current="step"><span></span></button>
+                <button class="sale-photo__segment" type="button" data-story-index="1" data-story-state="upcoming" aria-label="Mostrar foto 2"><span></span></button>
+                <button class="sale-photo__segment" type="button" data-story-index="2" data-story-state="upcoming" aria-label="Mostrar foto 3"><span></span></button>
+                <button class="sale-photo__segment" type="button" data-story-index="3" data-story-state="upcoming" aria-label="Mostrar foto 4"><span></span></button>
+                <button class="sale-photo__segment" type="button" data-story-index="4" data-story-state="upcoming" aria-label="Mostrar foto 5"><span></span></button>
+                <button class="sale-photo__segment" type="button" data-story-index="5" data-story-state="upcoming" aria-label="Mostrar foto 6"><span></span></button>
+                <button class="sale-photo__segment" type="button" data-story-index="6" data-story-state="upcoming" aria-label="Mostrar foto 7"><span></span></button>
+                <button class="sale-photo__segment" type="button" data-story-index="7" data-story-state="upcoming" aria-label="Mostrar foto 8"><span></span></button>
               </div>
-            </div>
-
-            <p class="muted sale-form__notice" id="saleStockNotice" aria-live="polite"></p>
-            <p class="form__error" id="saleFormError" role="alert" hidden></p>
-
-            <div class="sale-form__footer">
-              <div class="sale-total">
-                <span>Total del fiado</span>
-                <output id="saleTotal" aria-live="polite">B/. 0.00</output>
+              <span class="sale-photo__badge"><i class="bi bi-geo-alt-fill" aria-hidden="true"></i> Panamá</span>
+              <div class="sale-photo__controls" role="group" aria-label="Controles de historias">
+                <button class="sale-photo__control" type="button" data-story-previous aria-label="Historia anterior"><i class="bi bi-chevron-left" aria-hidden="true"></i></button>
+                <button class="sale-photo__control" type="button" data-story-toggle aria-label="Reproducción automática de historias" aria-pressed="true"><i class="bi bi-pause-fill" data-story-toggle-icon aria-hidden="true"></i></button>
+                <button class="sale-photo__control" type="button" data-story-next aria-label="Siguiente historia"><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
               </div>
-              <button class="btn btn--primary" type="submit"><i class="bi bi-check2-circle" aria-hidden="true"></i> Registrar fiado</button>
-            </div>
-          </form>
+              <figcaption class="sale-photo__caption">
+                <p data-story-caption>Del mostrador a tu libreta, todo más claro.</p>
+                <a class="sale-photo__credit" data-story-credit href="https://www.pexels.com/photo/fresh-coconuts-with-straws-in-panama-city-market-38331049/" target="_blank" rel="noopener noreferrer" aria-label="Créditos de la fotografía: Viola Bungard, Pexels"><i class="bi bi-info-circle" aria-hidden="true"></i> Créditos</a>
+              </figcaption>
+              <span class="visually-hidden" data-story-status aria-live="polite" aria-atomic="true"></span>
+            </figure>
+          </div>
         </section>
       </main>
     </div>
@@ -89,5 +117,6 @@
   <script src="Javas/firebase-config.js"></script>
   <script src="Javas/firebase-loader.js"></script>
   <script src="Javas/app.js"></script>
+  <script src="Javas/ventas-story.js"></script>
 </body>
 </html>
