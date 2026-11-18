@@ -39,9 +39,19 @@
           <div class="card"><p>Cobrado este mes</p><p class="stat">B/. <span id="rPaid">0.00</span></p></div>
           <div class="card"><p>Fiado este mes</p><p class="stat">B/. <span id="rCredit">0.00</span></p></div>
         </div>
+        <div class="report-chart-controls">
+          <label for="reportChartType">Tipo de gráfica</label>
+          <select id="reportChartType">
+            <option value="columnas" selected>Columnas</option>
+            <option value="barras">Barras horizontales</option>
+            <option value="circular">Circular</option>
+            <option value="anillo">Anillo</option>
+          </select>
+          <p>La selección se aplica a ambas gráficas.</p>
+        </div>
         <div class="grid-2">
-          <section class="panel-box"><h2 class="h3">Saldo por cliente</h2><div class="bars" id="rBars"></div></section>
-          <section class="panel-box"><h2 class="h3">Fiado y pagos de este mes</h2><div class="bars" id="rMonth"></div></section>
+          <section class="panel-box"><h2 class="h3">Saldo por cliente</h2><div class="report-chart" id="rBars"></div></section>
+          <section class="panel-box"><h2 class="h3">Fiado y pagos de este mes</h2><div class="report-chart" id="rMonth"></div></section>
         </div>
         <div><button class="btn btn--ghost" id="exportBtn" type="button"><i class="bi bi-download" aria-hidden="true"></i> Descargar lista de clientes (CSV)</button></div>
       </main>

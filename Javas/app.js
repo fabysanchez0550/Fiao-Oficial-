@@ -163,6 +163,112 @@ function bars(box, items) {
   });
 }
 
+const reportChartColors = ["var(--primary)", "var(--accent)", "var(--ink)", "var(--ok)"];
+
+function renderReportChart(container, items, chartType) {
+  container.replaceChildren();
+  const values = items.map(item => ({
+    label: String(item.label),
+    value: Math.max(0, Number(item.value) || 0)
+  }));
+  const total = values.reduce((sum, item) => sum + item.value, 0);
+  if (!values.length || total <= 0) {
+    container.append(h("p", "empty", tr("Todavía no hay datos para mostrar.")));
+    return;
+  }
+
+  const type = ["columnas", "barras", "circular", "anillo"].includes(chartType) ? chartType : "columnas";
+  const chart = h("div", `report-chart__visual report-chart__visual--${type}`);
+  const typeName = tr({
+    columnas: "Columnas",
+    barras: "Barras horizontales",
+    circular: "Circular",
+    anillo: "Anillo"
+  }[type]);
+  chart.setAttribute("role", "group");
+  chart.setAttribute("aria-label", tr("Gráfica de {type}", { type: typeName }));
+
+  if (type === "columnas") {
+    const columns = h("div", "report-chart__columns");
+    const max = Math.max(...values.map(item => item.value));
+    columns.style.minWidth = `${Math.max(20, values.length * 3.75)}rem`;
+    values.forEach((item, index) => {
+      const column = h("div", "report-chart__column");
+      const track = h("div", "report-chart__column-track");
+      const fill = h("span", "report-chart__fill");
+      fill.style.height = `${item.value / max * 100}%`;
+      fill.style.backgroundColor = reportChartColors[index % reportChartColors.length];
+      track.append(fill);
+      column.append(
+        h("strong", "report-chart__amount", money(item.value)),
+        track,
+        h("span", "report-chart__label", item.label)
+      );
+      columns.append(column);
+    });
+    chart.append(columns);
+  } else if (type === "barras") {
+    const rows = h("div", "report-chart__rows");
+    const max = Math.max(...values.map(item => item.value));
+    values.forEach((item, index) => {
+      const row = h("div", "report-chart__row");
+      const track = h("div", "report-chart__row-track");
+      const fill = h("span", "report-chart__fill");
+      fill.style.width = `${item.value / max * 100}%`;
+      fill.style.backgroundColor = reportChartColors[index % reportChartColors.length];
+      track.append(fill);
+      row.append(h("span", "report-chart__label", item.label), track, h("strong", "report-chart__amount", money(item.value)));
+      rows.append(row);
+    });
+    chart.append(rows);
+  } else {
+    const pieValues = values.length > 6
+      ? [...values.slice().sort((a, b) => b.value - a.value).slice(0, 5), {
+        label: tr("Otros"),
+        value: values.slice().sort((a, b) => b.value - a.value).slice(5).reduce((sum, item) => sum + item.value, 0)
+      }]
+      : values;
+    const pieTotal = pieValues.reduce((sum, item) => sum + item.value, 0);
+    const positiveValues = pieValues.filter(item => item.value > 0);
+    let position = 0;
+    const slices = positiveValues.map((item, index) => {
+      const start = position;
+      position += item.value / pieTotal * 100;
+      return `${reportChartColors[index % reportChartColors.length]} ${start}% ${position}%`;
+    });
+    const layout = h("div", "report-chart__pie-layout");
+    const pie = h("div", `report-chart__pie${type === "anillo" ? " report-chart__pie--donut" : ""}`);
+    pie.style.backgroundImage = `conic-gradient(${slices.join(", ")})`;
+    pie.setAttribute("role", "img");
+    pie.setAttribute("aria-label", tr("Distribución de datos por categoría"));
+    if (type === "anillo") {
+      const center = h("div", "report-chart__pie-center");
+      center.setAttribute("aria-hidden", "true");
+      center.append(h("span", "", tr("Total")), h("strong", "", money(pieTotal)));
+      pie.append(center);
+    }
+
+    const legend = h("ul", "report-chart__legend");
+    pieValues.forEach((item, index) => {
+      const entry = h("li", "report-chart__legend-item");
+      const swatch = h("span", "report-chart__swatch");
+      swatch.style.backgroundColor = reportChartColors[index % reportChartColors.length];
+      swatch.setAttribute("aria-hidden", "true");
+      const percentage = pieTotal ? (item.value / pieTotal * 100).toFixed(1) : "0.0";
+      entry.append(
+        swatch,
+        h("span", "report-chart__legend-label", item.label),
+        h("strong", "report-chart__amount", `${money(item.value)} · ${percentage}%`)
+      );
+      legend.append(entry);
+    });
+    layout.append(pie, legend);
+    chart.append(layout);
+  }
+
+  container.append(chart);
+}
+
 function makeDialog(id, title, body) {
   const d = document.createElement("dialog");
   d.id = id;
@@ -974,15 +1080,31 @@ function pageVentas() {
 
 /* ========== REPORTES ========== */
 function pageReportes() {
+  const chartTypeSelect = $("#reportChartType");
+  let chartType = chartTypeSelect.value || "columnas";
+  const renderCharts = () => {
+    renderReportChart(
+      $("#rBars"),
+      data.clients.filter(c => c.debt > 0).sort((a, b) => b.debt - a.debt).map(c => ({ label: c.name, value: c.debt })),
+      chartType
+    );
+    renderReportChart($("#rMonth"), [
+      { label: tr("Fiado"), value: monthSum("fiado") },
+      { label: tr("Pagos"), value: monthSum("pago") }
+    ], chartType);
+  };
   refresh = () => {
     const set = (id, val) => animateNumber($(id), parseFloat($(id).textContent) || 0, val, 900);
     set("#rTotal", totalDebt());
     set("#rPaid", monthSum("pago"));
     set("#rCredit", monthSum("fiado"));
     $("#rCount").textContent = data.clients.filter(c => c.debt > 0).length;
-    bars($("#rBars"), data.clients.filter(c => c.debt > 0).sort((a, b) => b.debt - a.debt).map(c => ({ label: c.name, value: c.debt })));
-    bars($("#rMonth"), [{ label: tr("Fiado"), value: monthSum("fiado") }, { label: tr("Pagos"), value: monthSum("pago") }]);
+    renderCharts();
   };
+  chartTypeSelect.addEventListener("change", () => {
+    chartType = chartTypeSelect.value;
+    renderCharts();
+  });
   refresh();
 
   $("#exportBtn").addEventListener("click", () => {

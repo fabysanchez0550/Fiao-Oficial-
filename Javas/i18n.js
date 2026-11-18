@@ -174,6 +174,10 @@ const EN = {
   "No encontramos ese producto.": "We couldn't find that product.",
   "Nadie": "Nobody", "Nadie tiene saldo pendiente.": "Nobody has an outstanding balance.",
   "Nada que mostrar todavía.": "Nothing to show yet.", "Sin teléfono": "No phone", "Teléfono": "Phone", "Saldo (B/.)": "Balance (B/.)",
+  "Tipo de gráfica": "Chart type", "Columnas": "Columns", "Barras horizontales": "Horizontal bars",
+  "Circular": "Pie chart", "Anillo": "Doughnut", "La selección se aplica a ambas gráficas.": "The selection applies to both charts.",
+  "Todavía no hay datos para mostrar.": "There is no data to display yet.",
+  "Gráfica de {type}": "{type} chart", "Distribución de datos por categoría": "Data distribution by category", "Otros": "Other", "Total": "Total",
 
   /* --- Datos de ejemplo --- */
   "Víveres": "Groceries", "Compra de la semana": "Weekly shopping",

@@ -651,6 +651,112 @@
   background: var(--soft);
 }
 .app[data-page="reportes"] .bar span { background: var(--primary); }
+.app[data-page="reportes"] .report-chart-controls {
+  display: grid;
+  grid-template-columns: auto minmax(180px, 250px) minmax(0, 1fr);
+  align-items: center;
+  gap: .75rem 1rem;
+  padding: .9rem 1.1rem;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--soft) 48%, var(--bg));
+}
+.report-chart-controls label { font-weight: 700; }
+.report-chart-controls select {
+  width: 100%;
+  min-height: 44px;
+  padding: .6rem .8rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--ink);
+  font: inherit;
+}
+.report-chart-controls select:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
+.report-chart-controls p { margin: 0; color: var(--muted); font-size: .9rem; }
+.report-chart { min-width: 0; margin-top: 1rem; }
+.report-chart__visual { min-width: 0; }
+.report-chart__visual--columnas { overflow-x: auto; padding-bottom: .35rem; }
+.report-chart__columns {
+  display: grid;
+  min-height: 222px;
+  grid-auto-columns: minmax(3.2rem, 1fr);
+  grid-auto-flow: column;
+  align-items: end;
+  gap: .65rem;
+  padding: .65rem .35rem 0;
+  border-bottom: 1px solid var(--line);
+}
+.report-chart__column {
+  display: grid;
+  min-width: 0;
+  grid-template-rows: 1.5rem 150px minmax(2.5rem, auto);
+  justify-items: center;
+  gap: .35rem;
+}
+.report-chart__column-track {
+  display: flex;
+  width: min(100%, 2.4rem);
+  height: 100%;
+  align-items: flex-end;
+  overflow: hidden;
+  border-radius: 10px 10px 3px 3px;
+  background: color-mix(in srgb, var(--soft) 62%, var(--bg));
+}
+.report-chart__fill {
+  display: block;
+  border-radius: 9px 9px 2px 2px;
+  transition: height .35s ease, width .35s ease;
+}
+.report-chart__column .report-chart__fill { width: 100%; }
+.report-chart__amount { font-size: .76rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.report-chart__label { min-width: 0; color: var(--muted); font-size: .78rem; line-height: 1.25; overflow-wrap: anywhere; text-align: center; }
+.report-chart__visual--barras { max-height: 390px; overflow: auto; }
+.report-chart__rows { display: grid; gap: .85rem; }
+.report-chart__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(50px, 2fr) auto;
+  align-items: center;
+  gap: .65rem;
+}
+.report-chart__row-track {
+  height: 13px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--soft) 62%, var(--bg));
+}
+.report-chart__row-track .report-chart__fill { height: 100%; border-radius: inherit; }
+.report-chart__pie-layout {
+  display: grid;
+  grid-template-columns: minmax(130px, 190px) minmax(0, 1fr);
+  align-items: center;
+  gap: 1rem;
+}
+.report-chart__pie {
+  display: grid;
+  width: min(100%, 190px);
+  aspect-ratio: 1;
+  place-items: center;
+  border-radius: 50%;
+}
+.report-chart__pie--donut { position: relative; }
+.report-chart__pie-center {
+  display: grid;
+  width: 56%;
+  aspect-ratio: 1;
+  place-content: center;
+  gap: .1rem;
+  border-radius: 50%;
+  background: var(--bg);
+  text-align: center;
+}
+.report-chart__pie-center span { color: var(--muted); font-size: .75rem; }
+.report-chart__pie-center strong { font-size: .82rem; font-variant-numeric: tabular-nums; }
+.report-chart__legend { display: grid; min-width: 0; gap: .55rem; margin: 0; padding: 0; list-style: none; }
+.report-chart__legend-item { display: grid; min-width: 0; grid-template-columns: 11px minmax(0, 1fr); align-items: center; gap: .25rem .55rem; }
+.report-chart__swatch { width: 11px; height: 11px; border-radius: 3px; }
+.report-chart__legend-label { min-width: 0; overflow-wrap: anywhere; }
+.report-chart__legend-item .report-chart__amount { grid-column: 2; color: var(--muted); white-space: normal; }
 
 .app[data-page="config"] .profile-card {
   border-radius: 5px 28px 5px 28px;
@@ -715,6 +821,9 @@
   .topbar h1 { font-size: 1.3rem; }
   .app-content { gap: 1rem; }
   .app-content .card { min-height: 125px; padding: 1rem; }
+  .app[data-page="reportes"] .report-chart-controls { grid-template-columns: 1fr; gap: .45rem; }
+  .report-chart__pie-layout { grid-template-columns: minmax(110px, 145px) minmax(0, 1fr); gap: .65rem; }
+  .report-chart__row { grid-template-columns: minmax(0, 1fr) minmax(45px, 1.5fr) auto; gap: .4rem; }
   .app[data-page="clientes"] .client-carousel { border-radius: 22px 5px 22px 5px; }
   .app[data-page="ventas"] .sale-panel { border-radius: 4px 18px 4px 18px; }
   .app[data-page="ventas"] .sale-photo { aspect-ratio: 4 / 3; }
