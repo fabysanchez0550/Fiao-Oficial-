@@ -400,9 +400,15 @@ body:not(.app) {
 }
 
 body:not(.app) .header {
+  transition: transform .3s var(--ease), background .3s, box-shadow .3s, backdrop-filter .3s;
   background: color-mix(in srgb, var(--bg) 94%, transparent);
   border-bottom: 1px solid color-mix(in srgb, var(--ink) 8%, transparent);
   backdrop-filter: blur(12px);
+}
+
+body:not(.app) .header.is-hidden {
+  pointer-events: none;
+  transform: translateY(-110%);
 }
 
 body:not(.app) .header.is-scrolled {
@@ -417,20 +423,6 @@ body:not(.app) .logo {
   font: 800 1.65rem/1 var(--font-ui);
   letter-spacing: -.08em;
 }
-body:not(.app) .logo__o {
-  display: inline-grid;
-  width: 1.05em;
-  aspect-ratio: 1;
-  place-items: center;
-  margin-left: .04em;
-  border-radius: 50%;
-  background: var(--ink);
-  color: var(--accent);
-  font-size: .72em;
-  letter-spacing: 0;
-  vertical-align: .1em;
-}
-
 body:not(.app) .nav { gap: clamp(.85rem, 1.8vw, 1.6rem); }
 body:not(.app) .nav > a:not(.btn) {
   font: 600 .9rem var(--font-ui);

@@ -88,8 +88,29 @@ $$("a.card").forEach(a => {
 
 /* ========== ENCABEZADO ========== */
 const header = $("#header");
-const onScroll = () => header.classList.toggle("is-scrolled", window.scrollY > 10);
+let lastScrollY = window.scrollY;
+const onScroll = () => {
+  const currentScrollY = window.scrollY;
+  header.classList.toggle("is-scrolled", currentScrollY > 10);
+
+  if (currentScrollY <= 80 || header.querySelector(".nav.is-open") || header.contains(document.activeElement)) {
+    header.classList.remove("is-hidden");
+    lastScrollY = currentScrollY;
+    return;
+  }
+
+  const scrollDelta = currentScrollY - lastScrollY;
+  if (Math.abs(scrollDelta) < 8) return;
+
+  if (scrollDelta > 0) {
+    header.classList.add("is-hidden");
+  } else {
+    header.classList.remove("is-hidden");
+  }
+  lastScrollY = currentScrollY;
+};
 window.addEventListener("scroll", onScroll, { passive: true });
+header.addEventListener("focusin", () => header.classList.remove("is-hidden"));
 onScroll();
 
 // Barra de progreso de lectura
@@ -132,6 +153,10 @@ function setMenu(open) {
   nav.classList.toggle("is-open", open);
   burger.setAttribute("aria-expanded", open);
   burger.setAttribute("aria-label", open ? tr("Cerrar menú") : tr("Abrir menú"));
+  if (open) {
+    header.classList.remove("is-hidden");
+    lastScrollY = window.scrollY;
+  }
 }
 burger.addEventListener("click", () => setMenu(!nav.classList.contains("is-open")));
 $$("#nav a").forEach(a => a.addEventListener("click", () => setMenu(false)));
