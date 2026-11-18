@@ -146,7 +146,7 @@ function movRow(m) {
   const date = m.ts ? fmtDate(m.ts) : m.date;
   left.append(h("strong", "", m.client), h("small", "", `${date} · ${items}`));
   const pago = m.type === "pago";
-  li.append(left, h("strong", pago ? "pos" : "neg", `${pago ? "−" : "+"} ${money(m.amount)}`));
+  li.append(left, h("strong", pago ? "pos" : "neg", `${pago ? "+" : "−"} ${money(m.amount)}`));
   return li;
 }
 
