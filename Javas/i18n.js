@@ -4,8 +4,8 @@
    agrégalo aquí y se traducirá solo. Para otro idioma, copia la lista y cámbiala. */
 
 const LANG_KEY = "fiao-lang";
-let LANG = "es";
-try { if (localStorage.getItem(LANG_KEY) === "en") LANG = "en"; } catch (e) {}
+let LANG = "en";
+try { if (localStorage.getItem(LANG_KEY) === "es") LANG = "es"; } catch (e) {}
 const LOCALE = LANG === "en" ? "en-US" : "es-PA";
 
 const EN = {
