@@ -10,16 +10,7 @@
     ],
     "headers": [
       {
-        "source": "Fiados.html",
-        "headers": [
-          {
-            "key": "Cache-Control",
-            "value": "no-cache, max-age=0, must-revalidate"
-          }
-        ]
-      },
-      {
-        "source": "Reportes.html",
+        "source": "**/*.html",
         "headers": [
           {
             "key": "Cache-Control",
@@ -47,6 +38,24 @@
       },
       {
         "source": "Javas/app.js",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache, max-age=0, must-revalidate"
+          }
+        ]
+      },
+      {
+        "source": "Javas/script.js",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache, max-age=0, must-revalidate"
+          }
+        ]
+      },
+      {
+        "source": "Javas/ventas-story.js",
         "headers": [
           {
             "key": "Cache-Control",
