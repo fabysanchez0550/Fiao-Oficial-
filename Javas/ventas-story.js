@@ -11,60 +11,77 @@
   const next = photo.querySelector("[data-story-next]");
   const toggle = photo.querySelector("[data-story-toggle]");
   const toggleIcon = toggle && toggle.querySelector("[data-story-toggle-icon]");
+  const isEn = typeof LANG !== "undefined" && LANG === "en";
   const stories = [
     {
       src: "assets/ventas-panama.jpg",
       alt: "Dos cocos frescos servidos en un puesto de Ciudad de Panamá.",
+      altEn: "Two fresh coconuts served at a stall in Panama City.",
       caption: "Un fresco de coco para el calor de Panamá.",
+      captionEn: "A coconut drink for Panama's heat.",
       photographer: "Viola Bungard",
       source: "https://www.pexels.com/photo/fresh-coconuts-with-straws-in-panama-city-market-38331049/"
     },
     {
       src: "assets/ventas-parrilla-panama.jpg",
       alt: "Un vendedor prepara chorizos en una parrilla al aire libre en Panamá.",
+      altEn: "A vendor grills sausages at an outdoor stand in Panama.",
       caption: "El sabor del puesto, hecho al momento.",
+      captionEn: "The flavor of the stand, made fresh.",
       photographer: "Concep Arroyo",
       source: "https://www.pexels.com/photo/panama-outdoor-bbq-with-smoked-sausages-37839583/"
     },
     {
       src: "assets/ventas-mercado-panama.jpg",
       alt: "Textiles coloridos y una bolsa rotulada PANAMA en un puesto de mercado.",
+      altEn: "Colorful textiles and a bag labeled PANAMA at a market stall.",
       caption: "Artesanía con sello panameño.",
+      captionEn: "Crafts with a Panamanian touch.",
       photographer: "Angela Chacón",
       source: "https://www.pexels.com/photo/textile-merchandise-on-market-18063571/"
     },
     {
       src: "assets/ventas-baile-panama.jpg",
       alt: "Una bailarina se presenta en una calle de Ciudad de Panamá mientras un fotógrafo la retrata.",
+      altEn: "A dancer performs on a street in Panama City while a photographer captures her.",
       caption: "Panamá también se vive en las calles.",
+      captionEn: "Panama is also lived in the streets.",
       photographer: "Alejandra Montenegro",
       source: "https://www.pexels.com/photo/woman-dancing-in-street-18049667/"
     },
     {
       src: "assets/ventas-mercado-urbano-panama.jpg",
       alt: "Fotógrafos capturan una escena urbana con puestos de mercado en Panamá.",
+      altEn: "Photographers capture an urban scene with market stalls in Panama.",
       caption: "Un mercado al aire libre, entre gente y movimiento.",
+      captionEn: "An open-air market, full of people and movement.",
       photographer: "Alejandra Montenegro",
       source: "https://www.pexels.com/photo/group-of-photographers-on-street-in-panama-18049680/"
     },
     {
       src: "assets/ventas-ciudad-panama.jpg",
       alt: "Rascacielos de Ciudad de Panamá al atardecer, junto a la bahía.",
+      altEn: "Panama City skyscrapers at sunset by the bay.",
       caption: "La ciudad cambia de ritmo al caer la tarde.",
+      captionEn: "The city changes pace at dusk.",
       photographer: "Mavis Santana",
       source: "https://www.pexels.com/photo/ciudad-panama-28225741/"
     },
     {
       src: "assets/ventas-puerto-panama.jpg",
       alt: "Botes en la bahía con el perfil de Ciudad de Panamá al fondo.",
+      altEn: "Boats in the bay with the Panama City skyline in the background.",
       caption: "La bahía y la ciudad, frente a frente.",
+      captionEn: "The bay and the city, face to face.",
       photographer: "Wilder Stiven Cardona Lopera",
       source: "https://www.pexels.com/photo/panama-city-skyline-with-boats-in-harbor-31365424/"
     },
     {
       src: "assets/ventas-canal-panama.jpg",
       alt: "Las esclusas del Canal de Panamá y su infraestructura marítima vistas de día.",
+      altEn: "The Panama Canal locks and its maritime infrastructure in daylight.",
       caption: "Las esclusas del Canal, a plena luz.",
+      captionEn: "The Canal locks, in full daylight.",
       photographer: "Rodolfo Quirós",
       source: "https://www.pexels.com/photo/gray-concrete-buildings-2219139/"
     }
@@ -95,22 +112,25 @@
   const updateControls = () => {
     photo.classList.toggle("is-paused", isPaused);
     toggle.setAttribute("aria-pressed", String(!isPaused));
-    toggle.setAttribute("aria-label", "Reproducción automática de historias");
+    toggle.setAttribute("aria-label", isEn ? "Automatic story playback" : "Reproducción automática de historias");
     toggleIcon.classList.toggle("bi-play-fill", isPaused);
     toggleIcon.classList.toggle("bi-pause-fill", !isPaused);
   };
 
   const renderStory = () => {
     const story = stories[currentIndex];
+    const storyCaption = isEn ? story.captionEn : story.caption;
     preloadStory((currentIndex + 1) % stories.length);
     image.classList.add("is-changing");
     image.src = story.src;
-    image.alt = story.alt;
-    caption.textContent = story.caption;
+    image.alt = isEn ? story.altEn : story.alt;
+    caption.textContent = storyCaption;
     credit.href = story.source;
-    credit.setAttribute("aria-label", `Créditos de la fotografía: ${story.photographer}, Pexels`);
-    credit.title = `Fotografía de ${story.photographer}`;
-    status.textContent = `Historia ${currentIndex + 1} de ${stories.length}. ${story.caption}`;
+    credit.setAttribute("aria-label", isEn ? `Photo credit: ${story.photographer}, Pexels` : `Créditos de la fotografía: ${story.photographer}, Pexels`);
+    credit.title = isEn ? `Photo by ${story.photographer}` : `Fotografía de ${story.photographer}`;
+    status.textContent = isEn
+      ? `Story ${currentIndex + 1} of ${stories.length}. ${storyCaption}`
+      : `Historia ${currentIndex + 1} de ${stories.length}. ${storyCaption}`;
 
     progress.forEach((button, index) => {
       button.dataset.storyState = index < currentIndex ? "complete" : "upcoming";
